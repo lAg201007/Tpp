@@ -4,11 +4,11 @@
 
 class Object {
 public:
-    std::shared_ptr<sf::Texture> spriteTexture;  // Shared pointer para textura
+    std::shared_ptr<sf::Texture> spriteTexture; 
     std::shared_ptr<sf::Sprite> sprite;
 
     Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) {
-        spriteTexture = std::make_shared<sf::Texture>();  // Alocando a textura com shared_ptr
+        spriteTexture = std::make_shared<sf::Texture>();  
 
         if (!spriteTexture->loadFromFile(imgfile)) {
             std::cerr << "Não foi possível carregar a imagem: " << imgfile << std::endl;
