@@ -77,6 +77,8 @@ int main()
     window->setFramerateLimit(60);
 
     while (window->isOpen()) {
+        // os tiles do x 0 e 32, e y 0 e 30 são as bordas, sempre devem ficar vazios
+        // os tiles usaveis são de x 1 a 31 e y 1 a 29
 
         while (const std::optional event = window->pollEvent()) {
 
@@ -88,6 +90,16 @@ int main()
 
         window->clear();
 
+        // fazendo os tiles das bordas ficarem vazio
+        for (const auto& row : tileMap) {
+            for (auto& tile : row) {
+                if (tile.xGridPos == 0 or tile.xGridPos == 32 or tile.yGridPos == 0 or tile.yGridPos == 30) {
+                    tile.sprite->setTexture(*empty_tile.texture);
+                }
+            }
+        }
+        
+        // desenhar tiles
         for (const auto& row : tileMap) {
             for (auto& tile : row) {
                 window->draw(*tile.sprite);
