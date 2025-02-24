@@ -48,16 +48,15 @@ int main()
 
     std::vector<std::vector<Tile>> tileMap;
 
-    for (int i = 1; i < rows + 1; i++) {
+    for (int i = 0; i < rows + 1; i++) {
         std::vector<Tile> row;
-        for (int a = 1; a < colums + 1; a++) {
+        for (int a = 0; a < colums + 1; a++) {
             Tile tile(a,i);
             row.emplace_back(tile);
         }
         tileMap.push_back(row);
     }
   
-
     std::unique_ptr window = std::make_unique<sf::RenderWindow> (sf::VideoMode({ width,height }), "Tetris");
 
     window->setFramerateLimit(60);
