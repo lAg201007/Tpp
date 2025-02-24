@@ -69,8 +69,18 @@ int main()
         }
         tileMap.push_back(row);
     }
-
+  
     Texture empty_tile("Sprites/empty_tile.png");
+
+    //loop pelos tiles antes de abrir a janela
+    for (const auto& row : tileMap) {
+        for (auto& tile : row) {
+            // fazendo os tiles das bordas ficarem vazio
+            if (tile.xGridPos == 0 or tile.xGridPos == 32 or tile.yGridPos == 0 or tile.yGridPos == 30) {
+                tile.sprite->setTexture(*empty_tile.texture);
+            }
+        }
+    }
 
     std::unique_ptr window = std::make_unique<sf::RenderWindow> (sf::VideoMode({ width,height }), "Tetris");
 
@@ -90,16 +100,7 @@ int main()
 
         window->clear();
 
-        // fazendo os tiles das bordas ficarem vazio
-        for (const auto& row : tileMap) {
-            for (auto& tile : row) {
-                if (tile.xGridPos == 0 or tile.xGridPos == 32 or tile.yGridPos == 0 or tile.yGridPos == 30) {
-                    tile.sprite->setTexture(*empty_tile.texture);
-                }
-            }
-        }
-        
-        // desenhar tiles
+        // loop pelos tiles depois de abrir a janela
         for (const auto& row : tileMap) {
             for (auto& tile : row) {
                 window->draw(*tile.sprite);
