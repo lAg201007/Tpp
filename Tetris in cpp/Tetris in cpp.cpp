@@ -53,16 +53,26 @@ public:
 
 Texture empty_tile("Sprites/empty_tile.png");
 Texture tile1("Sprites/tile1.png");
-
 class Piece {
 public:
     int posX, posY;
-    std::vector<std::pair<int, int>> pieceShape; 
+    std::vector<std::pair<int, int>> pieceShape;
     std::vector<std::vector<Tile>>& tileMap;
 
     Piece(std::vector<std::vector<Tile>>& map, int Xpos, int Ypos, std::vector<std::pair<int, int>> shape)
         : tileMap(map), posX(Xpos), posY(Ypos), pieceShape(shape) {
         placeOnTileMap();
+    }
+
+    void clearOnTileMap() {
+        for (const auto& [dx, dy] : pieceShape) {
+            int x = posX + dx;
+            int y = posY + dy;
+
+            if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
+                tileMap[y][x].sprite->setTexture(*empty_tile.texture); 
+            }
+        }
     }
 
     void placeOnTileMap() {
@@ -77,6 +87,7 @@ public:
     }
 
     void move(int dx, int dy) {
+        clearOnTileMap(); 
         posX += dx;
         posY += dy;
         placeOnTileMap(); 
@@ -140,7 +151,7 @@ int main() {
 
     // exemplo de peça:
     //          tile map, xpos, ypos, shape
-    // Piece LPiece(tileMap, 1, 1, LShape);
+    Piece LPiece(tileMap, 15, 1, LShape);
 
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
@@ -154,6 +165,19 @@ int main() {
 
             if (event->is<sf::Event::Closed>()) {
                 window->close();
+            }
+
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                    window->close();
+                    return 0;
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
+                    LPiece.move(-1, 0);
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
+                    LPiece.move(1, 0);
+                }
             }
 
         }
