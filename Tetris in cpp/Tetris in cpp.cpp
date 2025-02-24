@@ -123,6 +123,9 @@ std::vector<std::pair<int, int>> SShape = {
 };
 
 int main() {
+    int tickrate = 30;
+    int tick = 30;
+
     const int width = 256;
     const int height = 400; 
 
@@ -161,6 +164,8 @@ int main() {
         // Os tiles das bordas sempre devem ficar vazios
         // Tiles usáveis: x de 1 a 31 e y de 1 a 49
 
+        tick -= 1;
+
         while (const std::optional event = window->pollEvent()) {
 
             if (event->is<sf::Event::Closed>()) {
@@ -180,6 +185,11 @@ int main() {
                 }
             }
 
+        }
+
+        if (tick == 0) {
+            LPiece.move(0, 1);
+            tick = tickrate;
         }
 
         window->clear();
