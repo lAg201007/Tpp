@@ -4,11 +4,11 @@
 
 class Object {
 public:
-    std::shared_ptr<sf::Texture> spriteTexture; 
+    std::shared_ptr<sf::Texture> spriteTexture;
     std::shared_ptr<sf::Sprite> sprite;
 
     Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) {
-        spriteTexture = std::make_shared<sf::Texture>();  
+        spriteTexture = std::make_shared<sf::Texture>();
 
         if (!spriteTexture->loadFromFile(imgfile)) {
             std::cerr << "Não foi possível carregar a imagem: " << imgfile << std::endl;
@@ -18,7 +18,7 @@ public:
 
         sprite->setPosition({ startXpos, startYpos });
 
-        
+
         if (originX && originY) {
             sprite->setOrigin(sf::Vector2f(static_cast<float>(originX), static_cast<float>(originY)));
         }
@@ -35,6 +35,19 @@ public:
     Tile(int xGrid, int yGrid)
         : Object("Sprites/tile1.png", xGrid * 8.0f, yGrid * 8.0f,4,4) { 
         xGridPos = xGrid; yGridPos = yGrid;
+    }
+};
+
+class Texture {
+public:
+    std::shared_ptr<sf::Texture> texture;
+
+    Texture(std::string imgfile) {
+        texture = std::make_shared<sf::Texture>();
+
+        if (!texture->loadFromFile(imgfile)) {
+            std::cerr << "Não foi possível carregar a imagem: " << imgfile << std::endl;
+        }
     }
 };
 
@@ -56,7 +69,9 @@ int main()
         }
         tileMap.push_back(row);
     }
-  
+
+    Texture empty_tile("Sprites/empty_tile.png");
+
     std::unique_ptr window = std::make_unique<sf::RenderWindow> (sf::VideoMode({ width,height }), "Tetris");
 
     window->setFramerateLimit(60);
