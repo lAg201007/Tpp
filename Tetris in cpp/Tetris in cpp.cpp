@@ -54,8 +54,8 @@ public:
 int main()
 {
     const int width = 256;
-    const int height = 240;
-    
+    const int height = 400; 
+
     int colums = width / 8;
     int rows = height / 8;
 
@@ -64,31 +64,30 @@ int main()
     for (int i = 0; i < rows + 1; i++) {
         std::vector<Tile> row;
         for (int a = 0; a < colums + 1; a++) {
-            Tile tile(a,i);
+            Tile tile(a, i);
             row.emplace_back(tile);
         }
         tileMap.push_back(row);
     }
-  
+
     Texture empty_tile("Sprites/empty_tile.png");
 
-    //loop pelos tiles antes de abrir a janela
+    // Loop pelos tiles antes de abrir a janela
     for (const auto& row : tileMap) {
         for (auto& tile : row) {
-            // fazendo os tiles das bordas ficarem vazio
-            if (tile.xGridPos == 0 or tile.xGridPos == 32 or tile.yGridPos == 0 or tile.yGridPos == 30) {
+            if (tile.xGridPos == 0 || tile.xGridPos == colums || tile.yGridPos == 0 || tile.yGridPos == rows) {
                 tile.sprite->setTexture(*empty_tile.texture);
             }
         }
     }
 
-    std::unique_ptr window = std::make_unique<sf::RenderWindow> (sf::VideoMode({ width,height }), "Tetris");
+    std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
     window->setFramerateLimit(60);
 
     while (window->isOpen()) {
-        // os tiles do x 0 e 32, e y 0 e 30 são as bordas, sempre devem ficar vazios
-        // os tiles usaveis são de x 1 a 31 e y 1 a 29
+        // Os tiles das bordas sempre devem ficar vazios
+        // Tiles usáveis: x de 1 a 31 e y de 1 a 49
 
         while (const std::optional event = window->pollEvent()) {
 
@@ -100,7 +99,7 @@ int main()
 
         window->clear();
 
-        // loop pelos tiles depois de abrir a janela
+        // Loop pelos tiles depois de abrir a janela
         for (const auto& row : tileMap) {
             for (auto& tile : row) {
                 window->draw(*tile.sprite);
