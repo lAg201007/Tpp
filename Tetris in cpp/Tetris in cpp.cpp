@@ -33,7 +33,7 @@ public:
     int yGridPos;
 
     Tile(int xGrid, int yGrid)
-        : Object("Sprites/tile1.png", xGrid * 8.0f, yGrid * 8.0f,4,4) { 
+        : Object("Sprites/empty_tile.png", xGrid * 8.0f, yGrid * 8.0f,4,4) { 
         xGridPos = xGrid; yGridPos = yGrid;
     }
 };
