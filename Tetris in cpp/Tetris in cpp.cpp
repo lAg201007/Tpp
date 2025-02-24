@@ -51,8 +51,7 @@ public:
     }
 };
 
-int main()
-{
+int main() {
     const int width = 256;
     const int height = 400; 
 
@@ -105,10 +104,8 @@ int main()
                 window->draw(*tile.sprite);
             }
         }
-
         window->display();
     }
-
     return 0;
 }
 
