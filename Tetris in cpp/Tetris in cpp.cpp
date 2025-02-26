@@ -137,7 +137,6 @@ public:
         return true;
     }
 
-
     bool canMoveSideways(int direction) {  
         for (const auto& [pieceX, pieceY] : pieceShape) {
             // o pieceX é a posição relativa de cada tile dentro do shape
@@ -157,14 +156,25 @@ public:
 
     void rotate() {
         std::vector<std::pair<int, int>> originalShape = pieceShape;
-
-        clearOnTileMap();
+        
+        int minX = INT_MAX, minY = INT_MAX, maxX = INT_MIN, maxY = INT_MIN;
+        for (const auto& [x, y] : pieceShape) {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+        }
+        int originX = (minX + maxX) / 2;
+        int originY = (minY + maxY) / 2;
 
         std::vector<std::pair<int, int>> rotatedShape;
         for (const auto& [x, y] : pieceShape) {
-            rotatedShape.push_back({ -y, x });
+            int newX = originX - (y - originY);
+            int newY = originY + (x - originX);
+            rotatedShape.push_back({ newX, newY });
         }
 
+        clearOnTileMap();
         pieceShape = rotatedShape;
 
         if (!isRotationValid()) {
