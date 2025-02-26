@@ -57,6 +57,34 @@ std::string tile1_path = "Sprites/tile1.png";
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 
+std::vector<std::pair<int, int>> LShape = {
+    {0, 0}, {0, 1}, {0, 2}, {1, 2}
+};
+
+std::vector<std::pair<int, int>> JShape = {
+    {0, 0}, {0, 1}, {0, 2}, {-1, 2}
+};
+
+std::vector<std::pair<int, int>> OShape = {
+    {0, 0}, {0, 1}, {1, 0}, {1, 1}
+};
+
+std::vector<std::pair<int, int>> IShape = {
+    {0, 0}, {1, 0}, {2, 0}, {3, 0}
+};
+
+std::vector<std::pair<int, int>> TShape = {
+    {0, 0}, {1, 0}, {2, 0}, {1, 1}
+};
+
+std::vector<std::pair<int, int>> ZShape = {
+    {0, 1}, {1, 1}, {1, 0}, {2, 0}
+};
+
+std::vector<std::pair<int, int>> SShape = {
+    {0, 0}, {1, 0}, {1, 1}, {2, 1}
+};
+
 class Piece {
 public:
     int posX, posY;
@@ -195,34 +223,6 @@ public:
         return true;
     }
 
-};
-
-std::vector<std::pair<int, int>> LShape = {
-    {0, 0}, {0, 1}, {0, 2}, {1, 2}
-};
-
-std::vector<std::pair<int, int>> JShape = {
-    {0, 0}, {0, 1}, {0, 2}, {-1, 2}
-};
-
-std::vector<std::pair<int, int>> OShape = {
-    {0, 0}, {0, 1}, {1, 0}, {1, 1}
-};
-
-std::vector<std::pair<int, int>> IShape = {
-    {0, 0}, {1, 0}, {2, 0}, {3, 0}
-};
-
-std::vector<std::pair<int, int>> TShape = {
-    {0, 0}, {1, 0}, {2, 0}, {1, 1}
-};
-
-std::vector<std::pair<int, int>> ZShape = {
-    {0, 1}, {1, 1}, {1, 0}, {2, 0}
-};
-
-std::vector<std::pair<int, int>> SShape = {
-    {0, 0}, {1, 0}, {1, 1}, {2, 1}
 };
 
 int main() {
