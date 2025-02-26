@@ -242,8 +242,8 @@ int main() {
     const int width = 176;   
     const int height = 336;  
 
-    int colums = 12;    // 10 jogáveis + 2 de borda
-    int rows = 21;      // 20 jogáveis + 2 de borda
+    int colums = 12;    
+    int rows = 21;    
 
     std::vector<std::vector<Tile>> tileMap;
 
@@ -265,7 +265,6 @@ int main() {
         }
     }
 
-    // Posição inicial no centro do campo
     std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 5, 1, TShape);
    
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
