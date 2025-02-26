@@ -197,7 +197,9 @@ std::vector<std::pair<int, int>> SShape = {
 };
 
 int main() {
-    int tickrate = 5;
+    const int normal_tickrate = 5;
+    const int fast_tickrate = normal_tickrate / 4;
+    int tickrate = normal_tickrate;
     int tick = 5;
 
     const int width = 256;
@@ -262,6 +264,13 @@ int main() {
 
                 }
             }
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+            tickrate = fast_tickrate;
+        }
+        else {
+            tickrate = normal_tickrate;
         }
 
         if (tick == 0) {
