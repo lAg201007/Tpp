@@ -132,6 +132,31 @@ public:
         return true;
     }
 
+    bool checkIfIsPartOfPiece(int newX,int newY) {
+        for (const auto& [x, y] : pieceShape) {
+            if (posX + x == newX && posY + y == newY) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool checkIfMovable(int x,int y) {
+        if (x < 0 || x >= tileMap[0].size() || y < 0 || y >= tileMap.size()) {
+            return false;
+        }
+
+        if (tileMap[y][x].filePath != empty_tile_path) {
+            bool isPartOfPiece = checkIfIsPartOfPiece(x, y);
+            if (!isPartOfPiece) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     bool canMoveSideways(int direction) {  
         for (const auto& [pieceX, pieceY] : pieceShape) {
             // o pieceX é a posição relativa de cada tile dentro do shape
@@ -142,27 +167,40 @@ public:
             int currentY = posY + pieceY;
             int newX = currentX + direction;
 
-            if (newX < 0 || newX >= tileMap[0].size()) {
-                return false;
-            }
-
-            if (currentY >= 0 && currentY < tileMap.size() &&
-                tileMap[currentY][newX].filePath != empty_tile_path) {
-
-                bool isPartOfPiece = false;
-                for (const auto& [x, y] : pieceShape) {
-                    if (posX + x == newX && posY + y == currentY) {
-                        isPartOfPiece = true;
-                        break;
-                    }
-                }
-
-                if (!isPartOfPiece) {
-                    return false;
-                }
-            }
+            bool checkMove = checkIfMovable(newX, currentY);
+            if (!checkMove) { return false; }
         }
 
+        return true;
+    }
+
+    void rotate() {
+        std::vector<std::pair<int, int>> originalShape = pieceShape;
+
+        clearOnTileMap();
+
+        std::vector<std::pair<int, int>> rotatedShape;
+        for (const auto& [x, y] : pieceShape) {
+            rotatedShape.push_back({ -y, x });
+        }
+
+        pieceShape = rotatedShape;
+
+        if (!isRotationValid()) {
+            pieceShape = originalShape;
+        }
+
+        placeOnTileMap();
+    }
+
+    bool isRotationValid() {
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
+
+            bool checkRotation = checkIfMovable(x, y);
+            if (!checkRotation) { return false; }
+        }
         return true;
     }
 
@@ -197,8 +235,8 @@ std::vector<std::pair<int, int>> SShape = {
 };
 
 int main() {
-    const int normal_tickrate = 5;
-    const int fast_tickrate = normal_tickrate / 4;
+    int normal_tickrate = 5;
+    int fast_tickrate = normal_tickrate / 4;
     int tickrate = normal_tickrate;
     int tick = 5;
 
@@ -262,6 +300,9 @@ int main() {
                         MainPiece->move(1, 0);
                     }
 
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
+                    MainPiece->rotate();
                 }
             }
         }
