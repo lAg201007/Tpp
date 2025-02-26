@@ -99,39 +99,6 @@ public:
         placeOnTileMap(); 
     }
 
-    int getLowestTileY() {
-        int maxLocalY = pieceShape[0].second; 
-
-        for (const auto& [pieceX, pieceY] : pieceShape) {
-            if (pieceY > maxLocalY) {
-                maxLocalY = pieceY; 
-                
-            }
-        }
-
-        return posY + maxLocalY;
-    }
-
-    bool canMoveDown() {
-        int lowestY = getLowestTileY();
-
-        for (const auto& [pieceX, pieceY] : pieceShape) {
-           int x = posX + pieceX;
-           int y = lowestY + 1;
-           int generalY = posY + pieceY;
-
-           if (y >= tileMap.size() ) {
-               return false;
-           }
-           else if (tileMap[y][x].filePath != empty_tile_path) {
-               return false;
-           }
-
-        }
-
-        return true;
-    }
-
     bool checkIfIsPartOfPiece(int newX,int newY) {
         for (const auto& [x, y] : pieceShape) {
             if (posX + x == newX && posY + y == newY) {
@@ -156,6 +123,20 @@ public:
 
         return true;
     }
+
+    bool canMoveDown() {
+        for (const auto& [dx, dy] : pieceShape) {
+            int x = posX + dx;
+            int y = posY + dy;
+            int newY = y + 1; 
+
+            bool checkMove = checkIfMovable(x, newY);
+            if (!checkMove) { return false; }
+        }
+
+        return true;
+    }
+
 
     bool canMoveSideways(int direction) {  
         for (const auto& [pieceX, pieceY] : pieceShape) {
@@ -266,7 +247,7 @@ int main() {
         }
     }
 
-    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 15, 1, LShape);
+    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 15, 1, TShape);
    
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
@@ -317,7 +298,7 @@ int main() {
         if (tick == 0) {
             if (!MainPiece->canMoveDown()) {
                 MainPiece->move(0, 0);
-                MainPiece.reset(new Piece(tileMap, 15, 1, LShape));
+                MainPiece.reset(new Piece(tileMap, 15, 1, TShape));
             }
             else {
                 MainPiece->move(0, 1);
