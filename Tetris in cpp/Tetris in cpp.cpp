@@ -6,8 +6,9 @@ class Object {
 public:
     std::shared_ptr<sf::Texture> spriteTexture;
     std::shared_ptr<sf::Sprite> sprite;
+    std::string filePath;
 
-    Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) {
+    Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) : filePath(imgfile) {
         spriteTexture = std::make_shared<sf::Texture>();
 
         if (!spriteTexture->loadFromFile(imgfile)) {
@@ -51,13 +52,15 @@ public:
     }
 };
 
-Texture empty_tile("Sprites/empty_tile.png");
-Texture tile1("Sprites/tile1.png");
+std::string empty_tile_path = "Sprites/empty_tile.png";
+std::string tile1_path = "Sprites/tile1.png";
+Texture empty_tile(empty_tile_path);
+Texture tile1(tile1_path);
 
 class Piece {
 public:
     int posX, posY;
-    std::vector<std::pair<int, int>> pieceShape; 
+    std::vector<std::pair<int, int>> pieceShape;
     std::vector<std::vector<Tile>>& tileMap;
 
     Piece(std::vector<std::vector<Tile>>& map, int Xpos, int Ypos, std::vector<std::pair<int, int>> shape)
@@ -65,22 +68,133 @@ public:
         placeOnTileMap();
     }
 
-    void placeOnTileMap() {
-        for (const auto& [dx, dy] : pieceShape) {
-            int x = posX + dx;
-            int y = posY + dy;
+    void clearOnTileMap() {
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
-                tileMap[y][x].sprite->setTexture(*tile1.texture);
+                tileMap[y][x].sprite->setTexture(*empty_tile.texture); 
+                tileMap[y][x].filePath = empty_tile_path;
             }
         }
     }
 
-    void move(int dx, int dy) {
-        posX += dx;
-        posY += dy;
+    void placeOnTileMap() {
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
+
+            if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
+                tileMap[y][x].sprite->setTexture(*tile1.texture);
+                tileMap[y][x].filePath = tile1_path;
+            }
+        }
+    }
+
+    void move(int pieceX, int pieceY) {
+        clearOnTileMap();
+        posX += pieceX;
+        posY += pieceY;
         placeOnTileMap(); 
     }
+
+    bool checkIfIsPartOfPiece(int newX,int newY) {
+        for (const auto& [x, y] : pieceShape) {
+            if (posX + x == newX && posY + y == newY) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool checkIfMovable(int x,int y) {
+        if (x < 0 || x >= tileMap[0].size() || y < 0 || y >= tileMap.size()) {
+            return false;
+        }
+
+        if (tileMap[y][x].filePath != empty_tile_path) {
+            bool isPartOfPiece = checkIfIsPartOfPiece(x, y);
+            if (!isPartOfPiece) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool canMoveDown() {
+        for (const auto& [dx, dy] : pieceShape) {
+            int x = posX + dx;
+            int y = posY + dy;
+            int newY = y + 1; 
+
+            bool checkMove = checkIfMovable(x, newY);
+            if (!checkMove) { return false; }
+        }
+
+        return true;
+    }
+
+    bool canMoveSideways(int direction) {  
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            // o pieceX é a posição relativa de cada tile dentro do shape
+            // então o currentX é a posição da peca (tilemap) somada a posição do tile
+            // assim dando a posição do tile da peca no tile map
+
+            int currentX = posX + pieceX;
+            int currentY = posY + pieceY;
+            int newX = currentX + direction;
+
+            bool checkMove = checkIfMovable(newX, currentY);
+            if (!checkMove) { return false; }
+        }
+
+        return true;
+    }
+
+    void rotate() {
+        std::vector<std::pair<int, int>> originalShape = pieceShape;
+        
+        int minX = INT_MAX, minY = INT_MAX, maxX = INT_MIN, maxY = INT_MIN;
+        for (const auto& [x, y] : pieceShape) {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+        }
+        int originX = (minX + maxX) / 2;
+        int originY = (minY + maxY) / 2;
+
+        std::vector<std::pair<int, int>> rotatedShape;
+        for (const auto& [x, y] : pieceShape) {
+            int newX = originX - (y - originY);
+            int newY = originY + (x - originX);
+            rotatedShape.push_back({ newX, newY });
+        }
+
+        clearOnTileMap();
+        pieceShape = rotatedShape;
+
+        if (!isRotationValid()) {
+            pieceShape = originalShape;
+        }
+
+        placeOnTileMap();
+    }
+
+    bool isRotationValid() {
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
+
+            bool checkRotation = checkIfMovable(x, y);
+            if (!checkRotation) { return false; }
+        }
+        return true;
+    }
+
 };
 
 std::vector<std::pair<int, int>> LShape = {
@@ -112,6 +226,11 @@ std::vector<std::pair<int, int>> SShape = {
 };
 
 int main() {
+    int normal_tickrate = 5;
+    int fast_tickrate = normal_tickrate / 4;
+    int tickrate = normal_tickrate;
+    int tick = 5;
+
     const int width = 256;
     const int height = 400; 
 
@@ -138,10 +257,8 @@ int main() {
         }
     }
 
-    // exemplo de peça:
-    //          tile map, xpos, ypos, shape
-    // Piece LPiece(tileMap, 1, 1, LShape);
-
+    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 15, 1, TShape);
+   
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
     window->setFramerateLimit(60);
@@ -150,12 +267,53 @@ int main() {
         // Os tiles das bordas sempre devem ficar vazios
         // Tiles usáveis: x de 1 a 31 e y de 1 a 49
 
+        tick -= 1;
+
         while (const std::optional event = window->pollEvent()) {
 
             if (event->is<sf::Event::Closed>()) {
                 window->close();
             }
 
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                    window->close();
+                    return 0;
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
+                    if (MainPiece->canMoveSideways(-1)) {
+                        MainPiece->move(-1, 0);
+                    }
+                    
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
+                    if (MainPiece->canMoveSideways(1)) {
+                        MainPiece->move(1, 0);
+                    }
+
+                }
+                else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
+                    MainPiece->rotate();
+                }
+            }
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+            tickrate = fast_tickrate;
+        }
+        else {
+            tickrate = normal_tickrate;
+        }
+
+        if (tick == 0) {
+            if (!MainPiece->canMoveDown()) {
+                MainPiece->move(0, 0);
+                MainPiece.reset(new Piece(tileMap, 15, 1, TShape));
+            }
+            else {
+                MainPiece->move(0, 1);
+            }
+            tick = tickrate;
         }
 
         window->clear();
