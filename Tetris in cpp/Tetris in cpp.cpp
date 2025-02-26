@@ -1,6 +1,12 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <random>
+
+int rng(int min, int max) {
+    static std::mt19937 gen(std::random_device{}());
+    return std::uniform_int_distribution<int>{min, max}(gen);
+}
 
 class Object {
 public:
@@ -34,7 +40,7 @@ public:
     int yGridPos;
 
     Tile(int xGrid, int yGrid)
-        : Object("Sprites/empty_tile.png", xGrid * 8.0f, yGrid * 8.0f,4,4) { 
+        : Object("Sprites/empty_tile.png", xGrid * 16.0f, yGrid * 16.0f, 8, 8,2,2) { 
         xGridPos = xGrid; yGridPos = yGrid;
     }
 };
@@ -56,6 +62,7 @@ std::string empty_tile_path = "Sprites/empty_tile.png";
 std::string tile1_path = "Sprites/tile1.png";
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
+Texture wall("Sprites/wall.png");
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -138,7 +145,7 @@ public:
     }
 
     bool checkIfMovable(int x,int y) {
-        if (x < 0 || x >= tileMap[0].size() || y < 0 || y >= tileMap.size()) {
+        if (x < 2 || x >= tileMap[0].size() - 1 || y < 0 || y >= tileMap.size()) {
             return false;
         }
 
@@ -226,22 +233,23 @@ public:
 };
 
 int main() {
-    int normal_tickrate = 5;
+    int normal_tickrate = 20;
     int fast_tickrate = normal_tickrate / 4;
     int tickrate = normal_tickrate;
     int tick = 5;
 
-    const int width = 256;
-    const int height = 400; 
 
-    int colums = width / 8;
-    int rows = height / 8;
+    const int width = 176;   
+    const int height = 336;  
+
+    int colums = 12;    // 10 jogáveis + 2 de borda
+    int rows = 21;      // 20 jogáveis + 2 de borda
 
     std::vector<std::vector<Tile>> tileMap;
 
-    for (int i = 0; i < rows + 1; i++) {
+    for (int i = 0; i < rows; i++) {
         std::vector<Tile> row;
-        for (int a = 0; a < colums + 1; a++) {
+        for (int a = 0; a < colums; a++) {
             Tile tile(a, i);
             row.emplace_back(tile);
         }
@@ -251,13 +259,14 @@ int main() {
     // Loop pelos tiles antes de abrir a janela
     for (const auto& row : tileMap) {
         for (auto& tile : row) {
-            if (tile.xGridPos == 0 || tile.xGridPos == colums || tile.yGridPos == 0 || tile.yGridPos == rows) {
-                tile.sprite->setTexture(*empty_tile.texture);
+            if (tile.xGridPos == 1 || tile.xGridPos == colums-1 || tile.yGridPos == 0 || tile.yGridPos == rows) {
+                tile.sprite->setTexture(*wall.texture);
             }
         }
     }
 
-    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 15, 1, TShape);
+    // Posição inicial no centro do campo
+    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 5, 1, TShape);
    
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
@@ -265,7 +274,7 @@ int main() {
 
     while (window->isOpen()) {
         // Os tiles das bordas sempre devem ficar vazios
-        // Tiles usáveis: x de 1 a 31 e y de 1 a 49
+        // Tiles usáveis: x de 1 a 10 e y de 1 a 20
 
         tick -= 1;
 
@@ -308,7 +317,32 @@ int main() {
         if (tick == 0) {
             if (!MainPiece->canMoveDown()) {
                 MainPiece->move(0, 0);
-                MainPiece.reset(new Piece(tileMap, 15, 1, TShape));
+                int chosePiece = rng(1, 7);
+
+                switch (chosePiece) {
+                case 1:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
+                    break;
+                case 2:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, IShape));
+                    break;
+                case 3:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, LShape));
+                    break;
+                case 4:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, OShape));
+                    break;
+                case 5:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, ZShape));
+                    break;
+                case 6:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, SShape));
+                    break;
+                case 7:
+                    MainPiece.reset(new Piece(tileMap, 5, 1, JShape));
+                    break;
+                }
+                
             }
             else {
                 MainPiece->move(0, 1);
@@ -328,4 +362,3 @@ int main() {
     }
     return 0;
 }
-
