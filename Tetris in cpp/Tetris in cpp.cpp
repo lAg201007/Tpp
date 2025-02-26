@@ -6,8 +6,9 @@ class Object {
 public:
     std::shared_ptr<sf::Texture> spriteTexture;
     std::shared_ptr<sf::Sprite> sprite;
+    std::string filePath;
 
-    Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) {
+    Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) : filePath(imgfile) {
         spriteTexture = std::make_shared<sf::Texture>();
 
         if (!spriteTexture->loadFromFile(imgfile)) {
@@ -51,8 +52,11 @@ public:
     }
 };
 
-Texture empty_tile("Sprites/empty_tile.png");
-Texture tile1("Sprites/tile1.png");
+std::string empty_tile_path = "Sprites/empty_tile.png";
+std::string tile1_path = "Sprites/tile1.png";
+Texture empty_tile(empty_tile_path);
+Texture tile1(tile1_path);
+
 class Piece {
 public:
     int posX, posY;
@@ -71,6 +75,7 @@ public:
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
                 tileMap[y][x].sprite->setTexture(*empty_tile.texture); 
+                tileMap[y][x].filePath = empty_tile_path;
             }
         }
     }
@@ -82,16 +87,51 @@ public:
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
                 tileMap[y][x].sprite->setTexture(*tile1.texture);
+                tileMap[y][x].filePath = tile1_path;
             }
         }
     }
 
     void move(int dx, int dy) {
-        clearOnTileMap(); 
+        clearOnTileMap();
         posX += dx;
         posY += dy;
         placeOnTileMap(); 
     }
+
+    int getLowestTileY() {
+        int maxLocalY = pieceShape[0].second; 
+
+        for (const auto& [dx, dy] : pieceShape) {
+            if (dy > maxLocalY) {
+                maxLocalY = dy; 
+                
+            }
+        }
+
+        return posY + maxLocalY;
+    }
+
+    bool canMoveDown() {
+        int lowestY = getLowestTileY();
+
+        for (const auto& [dx, dy] : pieceShape) {
+           int x = posX + dx;
+           int y = lowestY + 1;
+           int generalY = posY + dy;
+
+           if (y >= tileMap.size() ) {
+               return false;
+           }
+           else if (tileMap[y][x].filePath != empty_tile_path) {
+               return false;
+           }
+
+        }
+
+        return true;
+    }
+
 };
 
 std::vector<std::pair<int, int>> LShape = {
@@ -123,8 +163,8 @@ std::vector<std::pair<int, int>> SShape = {
 };
 
 int main() {
-    int tickrate = 30;
-    int tick = 30;
+    int tickrate = 5;
+    int tick = 5;
 
     const int width = 256;
     const int height = 400; 
@@ -152,10 +192,8 @@ int main() {
         }
     }
 
-    // exemplo de peça:
-    //          tile map, xpos, ypos, shape
-    Piece LPiece(tileMap, 15, 1, LShape);
-
+    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 15, 1, LShape);
+   
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
     window->setFramerateLimit(60);
@@ -178,17 +216,22 @@ int main() {
                     return 0;
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
-                    LPiece.move(-1, 0);
+                    MainPiece->move(-1, 0);
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
-                    LPiece.move(1, 0);
+                    MainPiece->move(1, 0);
                 }
             }
-
         }
 
         if (tick == 0) {
-            LPiece.move(0, 1);
+            if (!MainPiece->canMoveDown()) {
+                MainPiece->move(0, 0);
+                MainPiece.reset(new Piece(tileMap, 15, 1, LShape));
+            }
+            else {
+                MainPiece->move(0, 1);
+            }
             tick = tickrate;
         }
 
