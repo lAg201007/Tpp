@@ -69,9 +69,9 @@ public:
     }
 
     void clearOnTileMap() {
-        for (const auto& [dx, dy] : pieceShape) {
-            int x = posX + dx;
-            int y = posY + dy;
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
                 tileMap[y][x].sprite->setTexture(*empty_tile.texture); 
@@ -81,9 +81,9 @@ public:
     }
 
     void placeOnTileMap() {
-        for (const auto& [dx, dy] : pieceShape) {
-            int x = posX + dx;
-            int y = posY + dy;
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int x = posX + pieceX;
+            int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
                 tileMap[y][x].sprite->setTexture(*tile1.texture);
@@ -92,19 +92,19 @@ public:
         }
     }
 
-    void move(int dx, int dy) {
+    void move(int pieceX, int pieceY) {
         clearOnTileMap();
-        posX += dx;
-        posY += dy;
+        posX += pieceX;
+        posY += pieceY;
         placeOnTileMap(); 
     }
 
     int getLowestTileY() {
         int maxLocalY = pieceShape[0].second; 
 
-        for (const auto& [dx, dy] : pieceShape) {
-            if (dy > maxLocalY) {
-                maxLocalY = dy; 
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            if (pieceY > maxLocalY) {
+                maxLocalY = pieceY; 
                 
             }
         }
@@ -115,10 +115,10 @@ public:
     bool canMoveDown() {
         int lowestY = getLowestTileY();
 
-        for (const auto& [dx, dy] : pieceShape) {
-           int x = posX + dx;
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+           int x = posX + pieceX;
            int y = lowestY + 1;
-           int generalY = posY + dy;
+           int generalY = posY + pieceY;
 
            if (y >= tileMap.size() ) {
                return false;
@@ -127,6 +127,40 @@ public:
                return false;
            }
 
+        }
+
+        return true;
+    }
+
+    bool canMoveSideways(int direction) {  
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            // o pieceX é a posição relativa de cada tile dentro do shape
+            // então o currentX é a posição da peca (tilemap) somada a posição do tile
+            // assim dando a posição do tile da peca no tile map
+
+            int currentX = posX + pieceX;
+            int currentY = posY + pieceY;
+            int newX = currentX + direction;
+
+            if (newX < 0 || newX >= tileMap[0].size()) {
+                return false;
+            }
+
+            if (currentY >= 0 && currentY < tileMap.size() &&
+                tileMap[currentY][newX].filePath != empty_tile_path) {
+
+                bool isPartOfPiece = false;
+                for (const auto& [x, y] : pieceShape) {
+                    if (posX + x == newX && posY + y == currentY) {
+                        isPartOfPiece = true;
+                        break;
+                    }
+                }
+
+                if (!isPartOfPiece) {
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -216,10 +250,16 @@ int main() {
                     return 0;
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
-                    MainPiece->move(-1, 0);
+                    if (MainPiece->canMoveSideways(-1)) {
+                        MainPiece->move(-1, 0);
+                    }
+                    
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
-                    MainPiece->move(1, 0);
+                    if (MainPiece->canMoveSideways(1)) {
+                        MainPiece->move(1, 0);
+                    }
+
                 }
             }
         }
