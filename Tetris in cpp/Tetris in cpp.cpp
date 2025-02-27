@@ -87,6 +87,7 @@ Sound MoveSound("SoundEffects/move.wav");
 Sound PlaceSound("SoundEffects/place.wav");
 Sound RotateSound("SoundEffects/rotate.wav");
 Sound ClearLineSound("SoundEffects/single.wav");
+Sound TetrisClearSound("SoundEffects/tetris.wav");
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -302,7 +303,12 @@ std::vector<int> checkCompletedLines(int startY, int endY, int columns, const st
 void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window) {
     if (lines.empty()) return;
 
-    ClearLineSound.sound->play();
+    if (lines.size() == 4) {
+        TetrisClearSound.sound->play();
+    }
+    else {
+        ClearLineSound.sound->play();
+    }
 
     for (int x = 2; x < columns - 1; x++) {
         for (int lineIndex : lines) {
