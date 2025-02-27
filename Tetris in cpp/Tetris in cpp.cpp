@@ -270,6 +270,24 @@ void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap) {
     }
 }
 
+void MakeGreaterYLevesFallAfterClearingALine(int YLine, int MaxYLevel, int colums, std::vector<std::vector<Tile>>& tileMap) {
+    for (int i = YLine - 1; i > 0; i--) {
+        for (int a = 2; a < colums - 1; a++) {
+            tileMap[i + 1][a].filePath = tileMap[i][a].filePath;
+
+            if (tileMap[i][a].filePath != empty_tile_path) {
+                tileMap[i + 1][a].sprite->setTexture(*tile1.texture);
+            }
+            else {
+                tileMap[i + 1][a].sprite->setTexture(*empty_tile.texture);
+            }
+
+            tileMap[i][a].filePath = empty_tile_path;
+            tileMap[i][a].sprite->setTexture(*empty_tile.texture);
+        }
+    }
+}
+
 int main() {
     int normal_tickrate = 20;
     int fast_tickrate = normal_tickrate / 4;
@@ -362,6 +380,7 @@ int main() {
 
                     if (lineClear) {
                         clearLine(tile.second, colums, tileMap);
+                        MakeGreaterYLevesFallAfterClearingALine(tile.second, rows, colums, tileMap);
                     }
                 }
                 
