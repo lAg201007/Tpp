@@ -229,15 +229,52 @@ public:
         }
         return true;
     }
+    
+    std::vector<std::pair<int, int>> getTiles() {
+        std::vector<std::pair<int, int>> tiles;
 
+        for (const auto& [pieceX, pieceY] : pieceShape) {
+            int currentX = posX + pieceX;
+            int currentY = posY + pieceY;
+
+            tiles.push_back({ currentX, currentY });
+        }
+
+        return tiles;
+    };
 };
+
+bool checkCompletedLine(int YLine, int colums, const std::vector<std::vector<Tile>>& tileMap) {
+    int checkedTiles = 0;
+    if (YLine < 0 || YLine >= tileMap.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < colums; i++) {
+        if (tileMap[YLine][i].filePath != empty_tile_path) {
+            checkedTiles++;
+        }
+    }
+;
+    if (checkedTiles == colums - 3) {
+        return true;
+    }
+    return false;
+}
+
+void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap) {
+    for (int i = 0; i < colums; i++) {
+        if (i == 1 || i == colums - 1) { continue; }
+        tileMap[YLine][i].filePath = empty_tile_path;
+        tileMap[YLine][i].sprite->setTexture(*empty_tile.texture);
+    }
+}
 
 int main() {
     int normal_tickrate = 20;
     int fast_tickrate = normal_tickrate / 4;
     int tickrate = normal_tickrate;
     int tick = 5;
-
 
     const int width = 176;   
     const int height = 336;  
@@ -318,6 +355,16 @@ int main() {
                 MainPiece->move(0, 0);
                 int chosePiece = rng(1, 7);
 
+                std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
+
+                for (auto& tile : tilesOfPiece) {
+                    bool lineClear = checkCompletedLine(tile.second, colums, tileMap);
+
+                    if (lineClear) {
+                        clearLine(tile.second, colums, tileMap);
+                    }
+                }
+                
                 switch (chosePiece) {
                 case 1:
                     MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
@@ -341,7 +388,7 @@ int main() {
                     MainPiece.reset(new Piece(tileMap, 5, 1, JShape));
                     break;
                 }
-                
+   
             }
             else {
                 MainPiece->move(0, 1);
