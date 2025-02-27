@@ -431,16 +431,6 @@ int main() {
                     }
                 }
 
-                /*
-                for (auto& tile : tilesOfPiece) {
-                    bool lineClear = checkCompletedLine(tile.second, colums, tileMap);
-
-                    if (lineClear) {
-                        clearLine(tile.second, colums, tileMap, *window);
-                        MakeGreaterYLevesFallAfterClearingALine(tile.second,rows, colums, tileMap);
-                    }
-                }
-                */
                 PlaceSound.sound->play();
 
                 switch (chosePiece) {
