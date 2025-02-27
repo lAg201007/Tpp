@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <memory>
 #include <random>
 #include <chrono>
@@ -81,6 +82,8 @@ std::string tile1_path = "Sprites/tile1.png";
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 Texture wall("Sprites/wall.png");
+
+
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
