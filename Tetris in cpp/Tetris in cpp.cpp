@@ -83,10 +83,10 @@ Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 Texture wall("Sprites/wall.png");
 
-Sound MoveSound("SoundEffect/move.mp3");
-Sound PlaceSound("SoundEffect/place.mp3");
-Sound RotateSound("SoundEffect/rotate.mp3");
-Sound ClearLineSound("SoundEffect/single.mp3");
+Sound MoveSound("SoundEffects/move.wav");
+Sound PlaceSound("SoundEffects/place.wav");
+Sound RotateSound("SoundEffects/rotate.wav");
+Sound ClearLineSound("SoundEffects/single.wav");
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -241,6 +241,7 @@ public:
         }
 
         placeOnTileMap();
+        RotateSound.sound->play();
     }
 
     bool isRotationValid() {
@@ -296,6 +297,7 @@ void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileM
 }
 
 void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window) {
+    ClearLineSound.sound->play();
     for (int x = 0; x < colums; x++) {
         if (x == 1 || x == colums - 1) { continue; }
         tileMap[YLine][x].filePath = empty_tile_path;
@@ -386,12 +388,14 @@ int main() {
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
                     if (MainPiece->canMoveSideways(-1)) {
+                        MoveSound.sound->play();
                         MainPiece->move(-1, 0);
                     }
                     
                 }
                 else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
                     if (MainPiece->canMoveSideways(1)) {
+                        MoveSound.sound->play();
                         MainPiece->move(1, 0);
                     }
 
@@ -425,6 +429,8 @@ int main() {
                     }
                 }
                 
+                PlaceSound.sound->play();
+
                 switch (chosePiece) {
                 case 1:
                     MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
