@@ -83,7 +83,10 @@ Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 Texture wall("Sprites/wall.png");
 
-
+Sound MoveSound("SoundEffect/move.mp3");
+Sound PlaceSound("SoundEffect/place.mp3");
+Sound RotateSound("SoundEffect/rotate.mp3");
+Sound ClearLineSound("SoundEffect/single.mp3");
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
