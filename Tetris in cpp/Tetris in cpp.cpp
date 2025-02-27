@@ -2,6 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <random>
+#include <chrono>
+#include <thread>
+
 
 int rng(int min, int max) {
     static std::mt19937 gen(std::random_device{}());
@@ -262,11 +265,28 @@ bool checkCompletedLine(int YLine, int colums, const std::vector<std::vector<Til
     return false;
 }
 
-void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap) {
+void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileMap) {
+    // Loop pelos tiles depois de abrir a janela
+    for (const auto& row : tileMap) {
+        for (auto& tile : row) {
+            window.draw(*tile.sprite);
+        }
+    }
+}
+
+void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window) {
     for (int x = 0; x < colums; x++) {
         if (x == 1 || x == colums - 1) { continue; }
         tileMap[YLine][x].filePath = empty_tile_path;
         tileMap[YLine][x].sprite->setTexture(*empty_tile.texture);
+        
+        window.clear();
+
+        renderTiles(window, tileMap);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        window.display();
     }
 }
 
@@ -379,8 +399,8 @@ int main() {
                     bool lineClear = checkCompletedLine(tile.second, colums, tileMap);
 
                     if (lineClear) {
-                        clearLine(tile.second, colums, tileMap);
-                        MakeGreaterYLevesFallAfterClearingALine(tile.second, rows, colums, tileMap);
+                        clearLine(tile.second, colums, tileMap, *window);
+                        MakeGreaterYLevesFallAfterClearingALine(tile.second,rows, colums, tileMap);
                     }
                 }
                 
@@ -417,12 +437,8 @@ int main() {
 
         window->clear();
 
-        // Loop pelos tiles depois de abrir a janela
-        for (const auto& row : tileMap) {
-            for (auto& tile : row) {
-                window->draw(*tile.sprite);
-            }
-        }
+        renderTiles(*window, tileMap);
+        
         window->display();
     }
     return 0;
