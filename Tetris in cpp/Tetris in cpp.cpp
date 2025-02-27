@@ -419,7 +419,19 @@ int main() {
                 int chosePiece = rng(1, 7);
 
                 std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
+                
+                for (int y = rows; y > 0; y--) {
+                    for (int x = 0; x < colums; x++) {
+                        bool lineClear = checkCompletedLine(y, colums, tileMap);
 
+                        if (lineClear) {
+                            clearLine(y, colums, tileMap, *window);
+                            MakeGreaterYLevesFallAfterClearingALine(y, rows, colums, tileMap);
+                        }
+                    }
+                }
+
+                /*
                 for (auto& tile : tilesOfPiece) {
                     bool lineClear = checkCompletedLine(tile.second, colums, tileMap);
 
@@ -428,7 +440,7 @@ int main() {
                         MakeGreaterYLevesFallAfterClearingALine(tile.second,rows, colums, tileMap);
                     }
                 }
-                
+                */
                 PlaceSound.sound->play();
 
                 switch (chosePiece) {
