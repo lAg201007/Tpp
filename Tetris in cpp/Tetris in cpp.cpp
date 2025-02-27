@@ -250,8 +250,8 @@ bool checkCompletedLine(int YLine, int colums, const std::vector<std::vector<Til
         return false;
     }
 
-    for (int i = 0; i < colums; i++) {
-        if (tileMap[YLine][i].filePath != empty_tile_path) {
+    for (int x = 0; x < colums; x++) {
+        if (tileMap[YLine][x].filePath != empty_tile_path) {
             checkedTiles++;
         }
     }
@@ -263,27 +263,27 @@ bool checkCompletedLine(int YLine, int colums, const std::vector<std::vector<Til
 }
 
 void clearLine(int YLine, int colums, std::vector<std::vector<Tile>>& tileMap) {
-    for (int i = 0; i < colums; i++) {
-        if (i == 1 || i == colums - 1) { continue; }
-        tileMap[YLine][i].filePath = empty_tile_path;
-        tileMap[YLine][i].sprite->setTexture(*empty_tile.texture);
+    for (int x = 0; x < colums; x++) {
+        if (x == 1 || x == colums - 1) { continue; }
+        tileMap[YLine][x].filePath = empty_tile_path;
+        tileMap[YLine][x].sprite->setTexture(*empty_tile.texture);
     }
 }
 
 void MakeGreaterYLevesFallAfterClearingALine(int YLine, int MaxYLevel, int colums, std::vector<std::vector<Tile>>& tileMap) {
-    for (int i = YLine - 1; i > 0; i--) {
-        for (int a = 2; a < colums - 1; a++) {
-            tileMap[i + 1][a].filePath = tileMap[i][a].filePath;
+    for (int y = YLine - 1; y > 0; y--) {
+        for (int x = 2; x < colums - 1; x++) {
+            tileMap[y + 1][x].filePath = tileMap[y][x].filePath;
 
-            if (tileMap[i][a].filePath != empty_tile_path) {
-                tileMap[i + 1][a].sprite->setTexture(*tile1.texture);
+            if (tileMap[y][x].filePath != empty_tile_path) {
+                tileMap[y + 1][x].sprite->setTexture(*tile1.texture);
             }
             else {
-                tileMap[i + 1][a].sprite->setTexture(*empty_tile.texture);
+                tileMap[y + 1][x].sprite->setTexture(*empty_tile.texture);
             }
 
-            tileMap[i][a].filePath = empty_tile_path;
-            tileMap[i][a].sprite->setTexture(*empty_tile.texture);
+            tileMap[y][x].filePath = empty_tile_path;
+            tileMap[y][x].sprite->setTexture(*empty_tile.texture);
         }
     }
 }
@@ -302,10 +302,10 @@ int main() {
 
     std::vector<std::vector<Tile>> tileMap;
 
-    for (int i = 0; i < rows; i++) {
+    for (int y = 0; y < rows; y++) {
         std::vector<Tile> row;
-        for (int a = 0; a < colums; a++) {
-            Tile tile(a, i);
+        for (int x = 0; x < colums; x++) {
+            Tile tile(x, y);
             row.emplace_back(tile);
         }
         tileMap.push_back(row);
