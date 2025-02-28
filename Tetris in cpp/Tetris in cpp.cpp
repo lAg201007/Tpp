@@ -235,20 +235,19 @@ public:
         }
 
         clearOnTileMap();
-        pieceShape = rotatedShape;
-
-        if (!isRotationValid()) {
-            pieceShape = originalShape;
+        
+        if (isRotationValid(rotatedShape)) {
+            pieceShape = rotatedShape;
+            RotateSound.sound->play();
         }
 
         placeOnTileMap();
-        RotateSound.sound->play();
     }
 
-    bool isRotationValid() {
-        for (const auto& [pieceX, pieceY] : pieceShape) {
-            int x = posX + pieceX;
-            int y = posY + pieceY;
+    bool isRotationValid(std::vector<std::pair<int,int>> rotatedShape) {
+        for (const auto& [X, Y] : rotatedShape) {
+            int x = posX + X;
+            int y = posY + Y;
 
             bool checkRotation = checkIfMovable(x, y);
             if (!checkRotation) { return false; }
