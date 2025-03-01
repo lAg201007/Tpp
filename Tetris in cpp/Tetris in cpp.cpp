@@ -5,80 +5,27 @@
 #include <random>
 #include <chrono>
 #include <thread>
-
+#include "SFML_CLASSES.h" 
 
 int rng(int min, int max) {
     static std::mt19937 gen(std::random_device{}());
     return std::uniform_int_distribution<int>{min, max}(gen);
 }
 
-class Object {
-public:
-    std::shared_ptr<sf::Texture> spriteTexture;
-    std::shared_ptr<sf::Sprite> sprite;
-    std::string filePath;
-
-    Object(std::string imgfile, float startXpos, float startYpos, int originX = 0, int originY = 0, float scaleX = 1, float scaleY = 1) : filePath(imgfile) {
-        spriteTexture = std::make_shared<sf::Texture>();
-
-        if (!spriteTexture->loadFromFile(imgfile)) {
-            std::cerr << "Não foi possível carregar a imagem: " << imgfile << std::endl;
-        }
-
-        sprite = std::make_shared<sf::Sprite>(*spriteTexture);
-
-        sprite->setPosition({ startXpos, startYpos });
-
-
-        if (originX && originY) {
-            sprite->setOrigin(sf::Vector2f(static_cast<float>(originX), static_cast<float>(originY)));
-        }
-
-        sprite->setScale({ scaleX, scaleY });
-    }
-};
-
 class Tile : public Object {
 public:
     int xGridPos;
     int yGridPos;
 
-    Tile(int xGrid, int yGrid)
-        : Object("Sprites/empty_tile.png", xGrid * 16.0f, yGrid * 16.0f, 8, 8,2,2) { 
+    Tile(int xGrid, int yGrid, int baseX, int baseY)
+        : Object("Sprites/empty_tile.png", (xGrid + baseX) * 16.0f, (yGrid + baseY) * 16.0f, 8, 8,2,2) {
         xGridPos = xGrid; yGridPos = yGrid;
-    }
-};
-
-class Texture {
-public:
-    std::shared_ptr<sf::Texture> texture;
-
-    Texture(std::string imgfile) {
-        texture = std::make_shared<sf::Texture>();
-
-        if (!texture->loadFromFile(imgfile)) {
-            std::cerr << "Não foi possível carregar a imagem: " << imgfile << std::endl;
-        }
-    }
-};
-
-class Sound {
-public:
-    sf::SoundBuffer Buffer;
-    std::unique_ptr<sf::Sound> sound;
-    Sound(std::string soundfile, int soundVolume = 100) {
-
-        if (!Buffer.loadFromFile(soundfile)) {
-            std::cerr << "Não foi possivel carregar som para o arquivo: " << soundfile << std::endl;
-        }
-
-        sound = std::make_unique<sf::Sound>(Buffer);
-        sound->setVolume(soundVolume);
     }
 };
 
 std::string empty_tile_path = "Sprites/empty_tile.png";
 std::string tile1_path = "Sprites/tile1.png";
+
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 Texture wall("Sprites/wall.png");
@@ -88,6 +35,8 @@ Sound PlaceSound("SoundEffects/place.wav");
 Sound RotateSound("SoundEffects/rotate.wav");
 Sound ClearLineSound("SoundEffects/single.wav");
 Sound TetrisClearSound("SoundEffects/tetris.wav");
+
+Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -317,6 +266,7 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
 
         window.clear();
         renderTiles(window, tileMap);
+        window.draw(*Gui.sprite);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         window.display();
     }
@@ -367,18 +317,21 @@ int main() {
     int tickrate = normal_tickrate;
     int tick = 5;
 
-    const int width = 176;   
-    const int height = 336;  
+    const int width = 512;   
+    const int height = 448;  
 
-    int colums = 12;    
+    int colums = 13;    
     int rows = 21;    
+
+    int yGridPos = 5;
+    int xGridPos = 11;
 
     std::vector<std::vector<Tile>> tileMap;
 
     for (int y = 0; y < rows; y++) {
         std::vector<Tile> row;
         for (int x = 0; x < colums; x++) {
-            Tile tile(x, y);
+            Tile tile(x, y, xGridPos,yGridPos);
             row.emplace_back(tile);
         }
         tileMap.push_back(row);
@@ -387,7 +340,7 @@ int main() {
     // Loop pelos tiles antes de abrir a janela
     for (const auto& row : tileMap) {
         for (auto& tile : row) {
-            if (tile.xGridPos == 1 || tile.xGridPos == colums-1 || tile.yGridPos == 0 || tile.yGridPos == rows) {
+            if (tile.xGridPos == 1 || tile.xGridPos == colums - 1 || tile.yGridPos == 0 || tile.yGridPos == rows) {
                 tile.sprite->setTexture(*wall.texture);
             }
         }
@@ -492,7 +445,9 @@ int main() {
         window->clear();
 
         renderTiles(*window, tileMap);
-        
+
+        window->draw(*Gui.sprite);
+
         window->display();
     }
     return 0;
