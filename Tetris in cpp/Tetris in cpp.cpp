@@ -330,6 +330,8 @@ void CreateNumberCounter(int startXPos, int startYPos, int number, sf::RenderWin
 }
 
 int main() {
+    int top_score = 0;
+
     start:
 
     int level = 0;
@@ -501,6 +503,10 @@ int main() {
                             score += 1200 * (level + 1);
                         }
 
+                        if (score > top_score) {
+                            top_score = score;
+                        }
+
                         if (linesThisLevel >= linesForLevelingUp) {
                             linesThisLevel -= linesForLevelingUp;
                             linesForLevelingUp + 10;
@@ -556,6 +562,8 @@ int main() {
             CreateNumberCounter(416, 320, level, *window);
 
             CreateNumberCounter(384,112, score, *window);
+
+            CreateNumberCounter(384, 64, top_score, *window);
 
             window->display();
         }
