@@ -18,17 +18,19 @@ public:
     int yGridPos;
 
     Tile(int xGrid, int yGrid, int baseX, int baseY)
-        : Object("Sprites/empty_tile.png", (xGrid + baseX) * 16.0f, (yGrid + baseY) * 16.0f, 8, 8,2,2) {
+        : Object("Sprites/Tiles/empty_tile.png", (xGrid + baseX) * 16.0f, (yGrid + baseY) * 16.0f, 8, 8,2,2) {
         xGridPos = xGrid; yGridPos = yGrid;
     }
 };
 
-std::string empty_tile_path = "Sprites/empty_tile.png";
-std::string tile1_path = "Sprites/tile1.png";
+
+// /Tiles/
+std::string empty_tile_path = "Sprites/Tiles/empty_tile.png";
+std::string tile1_path = "Sprites/Tiles/tile1.png";
 
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
-Texture wall("Sprites/wall.png");
+Texture wall("Sprites/Tiles/wall.png");
 
 Sound MoveSound("SoundEffects/move.wav");
 Sound PlaceSound("SoundEffects/place.wav");
