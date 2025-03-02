@@ -404,6 +404,8 @@ int main() {
     bool InGame = false;
     bool InGameOverScreen = false;
 
+    std::pair<int, int> PiecesRandom = { rng(1,7),rng(1,7)};
+
     while (window->isOpen()) {
         while (InTitleScreen) {
             while (const std::optional event = window->pollEvent()) {
@@ -500,7 +502,9 @@ int main() {
                     }
 
                     MainPiece->move(0, 0);
-                    int chosePiece = rng(1, 7);
+
+                    PiecesRandom.first = PiecesRandom.second;
+                    PiecesRandom.second = rng(1, 7);
 
                     std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
                 
@@ -539,7 +543,7 @@ int main() {
 
                     PlaceSound.sound->play();
 
-                    switch (chosePiece) {
+                    switch (PiecesRandom.first) {
                     case 1:
                         MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
                         break;
