@@ -36,6 +36,7 @@ Sound PlaceSound("SoundEffects/place.wav");
 Sound RotateSound("SoundEffects/rotate.wav");
 Sound ClearLineSound("SoundEffects/single.wav");
 Sound TetrisClearSound("SoundEffects/tetris.wav");
+Sound LevelUpSound("SoundEffects/level_up.wav", 200);
 
 Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 
@@ -328,8 +329,14 @@ void CreateNumberCounter(int startXPos, int startYPos, int number, sf::RenderWin
 }
 
 int main() {
-    int normal_tickrate = 20;
-    int fast_tickrate = normal_tickrate / 4;
+    int level = 0;
+    int linesForLevelingUp = 10;
+    int linesThisLevel = 0;
+
+    int score = 0;
+
+    int normal_tickrate = 48 - (level * 5);
+    int fast_tickrate = 3;
     int tickrate = normal_tickrate;
     int tick = 5;
 
@@ -370,9 +377,23 @@ int main() {
 
     window->setFramerateLimit(60);
 
+    int previous_tickrate = normal_tickrate;
+
     while (window->isOpen()) {
         // Os tiles das bordas sempre devem ficar vazios
         // Tiles usáveis: x de 1 a 10 e y de 1 a 20
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+            tickrate = fast_tickrate;
+        }
+        else {
+            tickrate = normal_tickrate;
+        }
+
+        if (previous_tickrate != tickrate) {
+            tick = 1;
+            previous_tickrate = tickrate;
+        }
 
         tick -= 1;
 
@@ -407,13 +428,6 @@ int main() {
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            tickrate = fast_tickrate;
-        }
-        else {
-            tickrate = normal_tickrate;
-        }
-
         if (tick == 0) {
             if (!MainPiece->canMoveDown()) {
                 MainPiece->move(0, 0);
@@ -424,6 +438,28 @@ int main() {
                 std::vector<int> completedLines = checkCompletedLines(1, rows - 1, colums, tileMap);
                 if (!completedLines.empty()) {
                     lineCounter += completedLines.size();
+                    linesThisLevel += completedLines.size();
+
+                    if (completedLines.size() == 1) {
+                        score += 40 * (level + 1);
+                    }
+                    else if (completedLines.size() == 2) {
+                        score += 100 * (level + 1);
+                    }
+                    else if (completedLines.size() == 3) {
+                        score += 300 * (level + 1);
+                    }
+                    else if (completedLines.size() == 4) {
+                        score += 1200 * (level + 1);
+                    }
+
+                    if (linesThisLevel >= linesForLevelingUp) {
+                        linesThisLevel -= linesForLevelingUp;
+                        linesForLevelingUp + 10;
+                        level++;
+                        LevelUpSound.sound->play();
+                    }
+
                     clearLines(completedLines, colums, tileMap, *window);
                     makeBlocksFall(completedLines, colums, tileMap);
                 }
@@ -468,6 +504,10 @@ int main() {
         window->draw(*Gui.sprite);
 
         CreateNumberCounter(304, 32, lineCounter, *window);
+
+        CreateNumberCounter(416, 320, level, *window);
+
+        CreateNumberCounter(384,112, score, *window);
 
         window->display();
     }
