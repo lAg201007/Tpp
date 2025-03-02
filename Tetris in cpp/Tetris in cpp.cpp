@@ -7,6 +7,7 @@
 #include <thread>
 #include <cmath>
 #include "SFML_CLASSES.h" 
+#include <fstream>
 
 int rng(int min, int max) {
     static std::mt19937 gen(std::random_device{}());
@@ -329,9 +330,24 @@ void CreateNumberCounter(int startXPos, int startYPos, int number, sf::RenderWin
     
 }
 
+void SaveTopScore(int score) {
+    std::string fileName = "data.bin";
+
+    std::ofstream Data(fileName, std::ios::binary);
+    Data << score;
+    Data.close();
+}
+
 int main() {
     int top_score = 0;
 
+    std::ifstream Data("data.bin");
+
+    if (Data) {
+        Data >> top_score;
+        Data.close();
+    }
+    
     start:
 
     int level = 0;
@@ -438,12 +454,14 @@ int main() {
 
                 if (event->is<sf::Event::Closed>()) {
                     window->close();
+                    SaveTopScore(top_score);
                     return 0;
                 }
 
                 else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                     if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
                         window->close();
+                        SaveTopScore(top_score);
                         return 0;
                     }
                     else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
@@ -477,6 +495,7 @@ int main() {
                         clearLines(allYs, colums, tileMap, *window, tile1);
                         InGame = false;
                         std::this_thread::sleep_for(std::chrono::seconds(2));
+                        SaveTopScore(top_score);
                         goto start;
                     }
 
