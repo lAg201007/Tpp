@@ -39,6 +39,7 @@ Sound TetrisClearSound("SoundEffects/tetris.wav");
 Sound LevelUpSound("SoundEffects/level_up.wav", 200);
 
 Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
+Object TitleScreen("Sprites/title_screen.png", 0, 0, 0, 0, 2.0f, 2.0f);
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -379,137 +380,171 @@ int main() {
 
     int previous_tickrate = normal_tickrate;
 
+    bool InTitleScreen = true;
+    bool InGame = false;
+    bool InGameOverScreen = false;
+
     while (window->isOpen()) {
-        // Os tiles das bordas sempre devem ficar vazios
-        // Tiles usáveis: x de 1 a 10 e y de 1 a 20
+        while (InTitleScreen) {
+            while (const std::optional event = window->pollEvent()) {
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            tickrate = fast_tickrate;
-        }
-        else {
-            tickrate = normal_tickrate;
-        }
-
-        if (previous_tickrate != tickrate) {
-            tick = 1;
-            previous_tickrate = tickrate;
-        }
-
-        tick -= 1;
-
-        while (const std::optional event = window->pollEvent()) {
-
-            if (event->is<sf::Event::Closed>()) {
-                window->close();
-            }
-
-            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                if (event->is<sf::Event::Closed>()) {
                     window->close();
                     return 0;
                 }
-                else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
-                    if (MainPiece->canMoveSideways(-1)) {
-                        MoveSound.sound->play();
-                        MainPiece->move(-1, 0);
-                    }
-                    
-                }
-                else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
-                    if (MainPiece->canMoveSideways(1)) {
-                        MoveSound.sound->play();
-                        MainPiece->move(1, 0);
-                    }
 
-                }
-                else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
-                    MainPiece->rotate();
+                else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                        window->close();
+                        return 0;
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
+                        InTitleScreen = false;
+                        InGame = true;
+                    }
                 }
             }
+
+            window->clear();
+
+            window->draw(*TitleScreen.sprite);
+
+            window->display();
         }
 
-        if (tick == 0) {
-            if (!MainPiece->canMoveDown()) {
-                MainPiece->move(0, 0);
-                int chosePiece = rng(1, 7);
+        while (InGame) {
+            // Os tiles das bordas sempre devem ficar vazios
+            // Tiles usáveis: x de 1 a 10 e y de 1 a 20
 
-                std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
-                
-                std::vector<int> completedLines = checkCompletedLines(1, rows - 1, colums, tileMap);
-                if (!completedLines.empty()) {
-                    lineCounter += completedLines.size();
-                    linesThisLevel += completedLines.size();
-
-                    if (completedLines.size() == 1) {
-                        score += 40 * (level + 1);
-                    }
-                    else if (completedLines.size() == 2) {
-                        score += 100 * (level + 1);
-                    }
-                    else if (completedLines.size() == 3) {
-                        score += 300 * (level + 1);
-                    }
-                    else if (completedLines.size() == 4) {
-                        score += 1200 * (level + 1);
-                    }
-
-                    if (linesThisLevel >= linesForLevelingUp) {
-                        linesThisLevel -= linesForLevelingUp;
-                        linesForLevelingUp + 10;
-                        level++;
-                        LevelUpSound.sound->play();
-                    }
-
-                    clearLines(completedLines, colums, tileMap, *window);
-                    makeBlocksFall(completedLines, colums, tileMap);
-                }
-
-                PlaceSound.sound->play();
-
-                switch (chosePiece) {
-                case 1:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
-                    break;
-                case 2:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, IShape));
-                    break;
-                case 3:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, LShape));
-                    break;
-                case 4:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, OShape));
-                    break;
-                case 5:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, ZShape));
-                    break;
-                case 6:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, SShape));
-                    break;
-                case 7:
-                    MainPiece.reset(new Piece(tileMap, 5, 1, JShape));
-                    break;
-                }
-   
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                tickrate = fast_tickrate;
             }
             else {
-                MainPiece->move(0, 1);
+                tickrate = normal_tickrate;
             }
-            tick = tickrate;
+
+            if (previous_tickrate != tickrate) {
+                tick = 1;
+                previous_tickrate = tickrate;
+            }
+
+            tick -= 1;
+
+            while (const std::optional event = window->pollEvent()) {
+
+                if (event->is<sf::Event::Closed>()) {
+                    window->close();
+                    return 0;
+                }
+
+                else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                        window->close();
+                        return 0;
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
+                        if (MainPiece->canMoveSideways(-1)) {
+                            MoveSound.sound->play();
+                            MainPiece->move(-1, 0);
+                        }
+                    
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
+                        if (MainPiece->canMoveSideways(1)) {
+                            MoveSound.sound->play();
+                            MainPiece->move(1, 0);
+                        }
+
+                    }
+                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
+                        MainPiece->rotate();
+                    }
+                }
+            }
+
+            if (tick == 0) {
+                if (!MainPiece->canMoveDown()) {
+                    MainPiece->move(0, 0);
+                    int chosePiece = rng(1, 7);
+
+                    std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
+                
+                    std::vector<int> completedLines = checkCompletedLines(1, rows - 1, colums, tileMap);
+                    if (!completedLines.empty()) {
+                        lineCounter += completedLines.size();
+                        linesThisLevel += completedLines.size();
+
+                        if (completedLines.size() == 1) {
+                            score += 40 * (level + 1);
+                        }
+                        else if (completedLines.size() == 2) {
+                            score += 100 * (level + 1);
+                        }
+                        else if (completedLines.size() == 3) {
+                            score += 300 * (level + 1);
+                        }
+                        else if (completedLines.size() == 4) {
+                            score += 1200 * (level + 1);
+                        }
+
+                        if (linesThisLevel >= linesForLevelingUp) {
+                            linesThisLevel -= linesForLevelingUp;
+                            linesForLevelingUp + 10;
+                            level++;
+                            LevelUpSound.sound->play();
+                        }
+
+                        clearLines(completedLines, colums, tileMap, *window);
+                        makeBlocksFall(completedLines, colums, tileMap);
+                    }
+
+                    PlaceSound.sound->play();
+
+                    switch (chosePiece) {
+                    case 1:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
+                        break;
+                    case 2:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, IShape));
+                        break;
+                    case 3:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, LShape));
+                        break;
+                    case 4:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, OShape));
+                        break;
+                    case 5:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, ZShape));
+                        break;
+                    case 6:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, SShape));
+                        break;
+                    case 7:
+                        MainPiece.reset(new Piece(tileMap, 5, 1, JShape));
+                        break;
+                    }
+   
+                }
+                else {
+                    MainPiece->move(0, 1);
+                }
+                tick = tickrate;
+            }
+
+            window->clear();
+
+            renderTiles(*window, tileMap);
+
+            window->draw(*Gui.sprite);
+
+            CreateNumberCounter(304, 32, lineCounter, *window);
+
+            CreateNumberCounter(416, 320, level, *window);
+
+            CreateNumberCounter(384,112, score, *window);
+
+            window->display();
         }
-
-        window->clear();
-
-        renderTiles(*window, tileMap);
-
-        window->draw(*Gui.sprite);
-
-        CreateNumberCounter(304, 32, lineCounter, *window);
-
-        CreateNumberCounter(416, 320, level, *window);
-
-        CreateNumberCounter(384,112, score, *window);
-
-        window->display();
     }
     return 0;
 }
