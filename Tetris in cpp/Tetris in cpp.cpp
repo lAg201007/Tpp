@@ -5,6 +5,7 @@
 #include <random>
 #include <chrono>
 #include <thread>
+#include <cmath>
 #include "SFML_CLASSES.h" 
 
 int rng(int min, int max) {
@@ -23,8 +24,6 @@ public:
     }
 };
 
-
-// /Tiles/
 std::string empty_tile_path = "Sprites/Tiles/empty_tile.png";
 std::string tile1_path = "Sprites/Tiles/tile1.png";
 
@@ -313,6 +312,21 @@ void makeBlocksFall(const std::vector<int>& clearedLines, int columns, std::vect
     }
 }
 
+void CreateNumberCounter(int startXPos, int startYPos, int number, sf::RenderWindow& window) {
+    std::string numberStr = std::to_string(number);
+    int numberQuantity = numberStr.length();
+    int ActualX = startXPos;
+
+    for (int i = 0; i < numberQuantity; i++) {
+        int displayNumber = numberStr[i] - '0';
+        std::string file = "Sprites/Numbers/" + std::to_string(displayNumber) + ".png";
+        Object Number(file, ActualX, startYPos, 0, 0, 2.0f, 2.0f);
+        window.draw(*Number.sprite);
+        ActualX += 16;
+    }
+    
+}
+
 int main() {
     int normal_tickrate = 20;
     int fast_tickrate = normal_tickrate / 4;
@@ -327,6 +341,8 @@ int main() {
 
     int yGridPos = 5;
     int xGridPos = 11;
+
+    int lineCounter = 0;
 
     std::vector<std::vector<Tile>> tileMap;
 
@@ -407,6 +423,7 @@ int main() {
                 
                 std::vector<int> completedLines = checkCompletedLines(1, rows - 1, colums, tileMap);
                 if (!completedLines.empty()) {
+                    lineCounter += completedLines.size();
                     clearLines(completedLines, colums, tileMap, *window);
                     makeBlocksFall(completedLines, colums, tileMap);
                 }
@@ -449,6 +466,8 @@ int main() {
         renderTiles(*window, tileMap);
 
         window->draw(*Gui.sprite);
+
+        CreateNumberCounter(304, 32, lineCounter, *window);
 
         window->display();
     }
