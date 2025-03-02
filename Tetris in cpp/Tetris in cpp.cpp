@@ -251,7 +251,7 @@ std::vector<int> checkCompletedLines(int startY, int endY, int columns, const st
     return completedLines;
 }
 
-void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window) {
+void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window, Texture texture) {
     if (lines.empty()) return;
 
     if (lines.size() == 4) {
@@ -264,7 +264,7 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
     for (int x = 2; x < columns - 1; x++) {
         for (int lineIndex : lines) {
             tileMap[lineIndex][x].filePath = empty_tile_path;
-            tileMap[lineIndex][x].sprite->setTexture(*empty_tile.texture);
+            tileMap[lineIndex][x].sprite->setTexture(*texture.texture);
         }
 
         window.clear();
@@ -330,6 +330,8 @@ void CreateNumberCounter(int startXPos, int startYPos, int number, sf::RenderWin
 }
 
 int main() {
+    start:
+
     int level = 0;
     int linesForLevelingUp = 10;
     int linesThisLevel = 0;
@@ -464,6 +466,18 @@ int main() {
 
             if (tick == 0) {
                 if (!MainPiece->canMoveDown()) {
+
+                    if (MainPiece->posY == 1) {
+                        std::vector<int> allYs;
+                        for (int y = rows - 1; y >= 0; y--) {
+                            allYs.push_back(y);
+                        }
+                        clearLines(allYs, colums, tileMap, *window, tile1);
+                        InGame = false;
+                        std::this_thread::sleep_for(std::chrono::seconds(2));
+                        goto start;
+                    }
+
                     MainPiece->move(0, 0);
                     int chosePiece = rng(1, 7);
 
@@ -494,7 +508,7 @@ int main() {
                             LevelUpSound.sound->play();
                         }
 
-                        clearLines(completedLines, colums, tileMap, *window);
+                        clearLines(completedLines, colums, tileMap, *window, empty_tile);
                         makeBlocksFall(completedLines, colums, tileMap);
                     }
 
