@@ -223,7 +223,6 @@ public:
 };
 
 void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileMap) {
-    // Loop pelos tiles depois de abrir a janela
     for (const auto& row : tileMap) {
         for (auto& tile : row) {
             window.draw(*tile.sprite);
