@@ -32,6 +32,14 @@ Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
 Texture wall("Sprites/Tiles/wall.png");
 
+Texture T("Sprites/Pieces/T.png");
+Texture J("Sprites/Pieces/J.png");
+Texture L("Sprites/Pieces/L.png");
+Texture I("Sprites/Pieces/I.png");
+Texture O("Sprites/Pieces/O.png");
+Texture Z("Sprites/Pieces/Z.png");
+Texture S("Sprites/Pieces/S.png");
+
 Sound MoveSound("SoundEffects/move.wav");
 Sound PlaceSound("SoundEffects/place.wav");
 Sound RotateSound("SoundEffects/rotate.wav");
@@ -41,6 +49,7 @@ Sound LevelUpSound("SoundEffects/level_up.wav", 200);
 
 Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object TitleScreen("Sprites/title_screen.png", 0, 0, 0, 0, 2.0f, 2.0f);
+Object NextPieceUI("Sprites/Pieces/L.png", 416, 240, 12, 12, 2.0f, 2.0f);
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -586,6 +595,33 @@ int main() {
             CreateNumberCounter(384,112, score, *window);
 
             CreateNumberCounter(384, 64, top_score, *window);
+
+            switch (PiecesRandom.second) {
+
+            case 1:
+                NextPieceUI.sprite->setTexture(*T.texture);
+                break;
+            case 2:
+                NextPieceUI.sprite->setTexture(*I.texture);
+                break;
+            case 3:
+                NextPieceUI.sprite->setTexture(*L.texture);
+                break;
+            case 4:
+                NextPieceUI.sprite->setTexture(*O.texture);
+                break;
+            case 5:
+                NextPieceUI.sprite->setTexture(*Z.texture);
+                break;
+            case 6:
+                NextPieceUI.sprite->setTexture(*S.texture);
+                break;
+            case 7:
+                NextPieceUI.sprite->setTexture(*J.texture);
+                break;
+            }
+
+            window->draw(*NextPieceUI.sprite);
 
             window->display();
         }
