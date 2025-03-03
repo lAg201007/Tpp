@@ -79,6 +79,8 @@ std::vector<std::pair<int, int>> SShape = {
     {0, 0}, {1, 0}, {1, 1}, {2, 1}
 };
 
+std::vector<std::pair<int, int>> PiecesArray[7] = {LShape,JShape,OShape,IShape,TShape,ZShape,SShape};
+
 class Piece {
 public:
     int posX, posY;
@@ -412,8 +414,8 @@ int main() {
     bool InGame = false;
     bool InGameOverScreen = false;
 
-    std::pair<int, int> PiecesRandom = { rng(1,7),rng(1,7)};
-
+    std::pair<std::vector<std::pair<int,int>>,std::vector<std::pair<int,int>>> PiecesRandom = {PiecesArray[rng(0,6)],PiecesArray[rng(0,6)]};
+    
     while (window->isOpen()) {
         while (InTitleScreen) {
             while (const std::optional event = window->pollEvent()) {
@@ -512,7 +514,7 @@ int main() {
                     MainPiece->move(0, 0);
 
                     PiecesRandom.first = PiecesRandom.second;
-                    PiecesRandom.second = rng(1, 7);
+                    PiecesRandom.second = PiecesArray[rng(0, 6)];
 
                     std::vector<std::pair<int, int>> tilesOfPiece = MainPiece->getTiles();
                 
@@ -551,30 +553,8 @@ int main() {
 
                     PlaceSound.sound->play();
 
-                    switch (PiecesRandom.first) {
-                    case 1:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, TShape));
-                        break;
-                    case 2:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, IShape));
-                        break;
-                    case 3:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, LShape));
-                        break;
-                    case 4:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, OShape));
-                        break;
-                    case 5:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, ZShape));
-                        break;
-                    case 6:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, SShape));
-                        break;
-                    case 7:
-                        MainPiece.reset(new Piece(tileMap, 5, 1, JShape));
-                        break;
-                    }
-   
+                    MainPiece.reset(new Piece(tileMap, 5, 1, PiecesRandom.first));
+
                 }
                 else {
                     MainPiece->move(0, 1);
@@ -596,30 +576,17 @@ int main() {
 
             CreateNumberCounter(384, 64, top_score, *window);
 
-            switch (PiecesRandom.second) {
+            Texture* pieceTextures[] = { &L, &J, &O, &I, &T, &S, &Z};
 
-            case 1:
-                NextPieceUI.sprite->setTexture(*T.texture);
-                break;
-            case 2:
-                NextPieceUI.sprite->setTexture(*I.texture);
-                break;
-            case 3:
-                NextPieceUI.sprite->setTexture(*L.texture);
-                break;
-            case 4:
-                NextPieceUI.sprite->setTexture(*O.texture);
-                break;
-            case 5:
-                NextPieceUI.sprite->setTexture(*Z.texture);
-                break;
-            case 6:
-                NextPieceUI.sprite->setTexture(*S.texture);
-                break;
-            case 7:
-                NextPieceUI.sprite->setTexture(*J.texture);
-                break;
+            int textureIndex = 0;
+            for (int i = 0; i < 7; i++) {
+                if (PiecesRandom.second == PiecesArray[i]) {
+                    textureIndex = i;
+                    break;
+                }
             }
+            
+            NextPieceUI.sprite->setTexture(*pieceTextures[textureIndex]->texture);
 
             window->draw(*NextPieceUI.sprite);
 
