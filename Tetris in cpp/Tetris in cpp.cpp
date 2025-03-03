@@ -25,11 +25,32 @@ public:
     }
 };
 
+std::string getLevelSpritePath(int level, int tileend) {
+    std::string levelStr;
+    std::string tileEnd ="_" + std::to_string(tileend) + ".png";
+
+    if (level % 10 == 0) {
+        levelStr = "10";
+    }
+    else {
+        levelStr = std::to_string(level % 10);
+    }
+
+    std::string fullPath = "Sprites/Tiles/" + levelStr + tileEnd;
+
+    return fullPath;
+}
+
 std::string empty_tile_path = "Sprites/Tiles/empty_tile.png";
-std::string tile1_path = "Sprites/Tiles/tile1.png";
+std::string tile1_path = "Sprites/Tiles/1_1.png";
+std::string tile2_path = "Sprites/Tiles/1_2.png";
+std::string tile3_path = "Sprites/Tiles/1_3.png";
 
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
+Texture tile2(tile2_path);
+Texture tile3(tile3_path);
+
 Texture wall("Sprites/Tiles/wall.png");
 
 Texture T("Sprites/Pieces/T.png");
@@ -50,6 +71,7 @@ Sound LevelUpSound("SoundEffects/level_up.wav", 200);
 Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object TitleScreen("Sprites/title_screen.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object NextPieceUI("Sprites/Pieces/L.png", 416, 240, 12, 12, 2.0f, 2.0f);
+
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -86,11 +108,24 @@ public:
     int posX, posY;
     std::vector<std::pair<int, int>> pieceShape;
     std::vector<std::vector<Tile>>& tileMap;
+    std::string currentTexturePath; // Novo atributo
 
     Piece(std::vector<std::vector<Tile>>& map, int Xpos, int Ypos, std::vector<std::pair<int, int>> shape)
         : tileMap(map), posX(Xpos), posY(Ypos), pieceShape(shape) {
-        placeOnTileMap();
+        if (shape == IShape || shape == OShape || shape == TShape) {
+            currentTexturePath = tile1_path;
+            placeOnTileMap(currentTexturePath, tile1);
+        }
+        else if (shape == ZShape || shape == JShape) {
+            currentTexturePath = tile3_path;
+            placeOnTileMap(currentTexturePath, tile3);
+        }
+        else if (shape == LShape || shape == SShape) {
+            currentTexturePath = tile2_path;
+            placeOnTileMap(currentTexturePath, tile2);
+        }
     }
+
 
     void clearOnTileMap() {
         for (const auto& [pieceX, pieceY] : pieceShape) {
@@ -104,14 +139,14 @@ public:
         }
     }
 
-    void placeOnTileMap() {
+    void placeOnTileMap(std::string path, Texture texture) {
         for (const auto& [pieceX, pieceY] : pieceShape) {
             int x = posX + pieceX;
             int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
-                tileMap[y][x].sprite->setTexture(*tile1.texture);
-                tileMap[y][x].filePath = tile1_path;
+                tileMap[y][x].sprite->setTexture(*texture.texture);
+                tileMap[y][x].filePath = path;
             }
         }
     }
@@ -120,7 +155,23 @@ public:
         clearOnTileMap();
         posX += pieceX;
         posY += pieceY;
-        placeOnTileMap(); 
+
+        Texture* textureToUse = nullptr;
+
+        if (currentTexturePath == tile1_path) {
+            textureToUse = &tile1;
+        }
+        else if (currentTexturePath == tile2_path) {
+            textureToUse = &tile2;
+        }
+        else if (currentTexturePath == tile3_path) {
+            textureToUse = &tile3;
+        }
+        else {
+            textureToUse = &empty_tile;
+        }
+
+        placeOnTileMap(currentTexturePath, *textureToUse);
     }
 
     bool checkIfIsPartOfPiece(int newX,int newY) {
@@ -205,7 +256,22 @@ public:
             RotateSound.sound->play();
         }
 
-        placeOnTileMap();
+        Texture* textureToUse = nullptr;
+
+        if (currentTexturePath == tile1_path) {
+            textureToUse = &tile1;
+        }
+        else if (currentTexturePath == tile2_path) {
+            textureToUse = &tile2;
+        }
+        else if (currentTexturePath == tile3_path) {
+            textureToUse = &tile3;
+        }
+        else {
+            textureToUse = &empty_tile;
+        }
+
+        placeOnTileMap(currentTexturePath, *textureToUse);
     }
 
     bool isRotationValid(std::vector<std::pair<int,int>> rotatedShape) {
@@ -381,7 +447,7 @@ int main() {
     
     start:
 
-    int level = 0;
+    int level = 1;
     int linesForLevelingUp = 10;
     int linesThisLevel = 0;
 
@@ -529,6 +595,15 @@ int main() {
                         InGame = false;
                         std::this_thread::sleep_for(std::chrono::seconds(2));
                         SaveTopScore(top_score);
+
+                        std::string tile1_path = "Sprites/Tiles/1_1.png";
+                        std::string tile2_path = "Sprites/Tiles/1_2.png";
+                        std::string tile3_path = "Sprites/Tiles/1_3.png";
+
+                        tile1.texture->loadFromFile(tile1_path);
+                        tile2.texture->loadFromFile(tile2_path);
+                        tile3.texture->loadFromFile(tile3_path);
+
                         goto start;
                     }
 
@@ -565,6 +640,15 @@ int main() {
                             linesThisLevel -= linesForLevelingUp;
                             linesForLevelingUp + 10;
                             level++;
+
+                            tile1_path = getLevelSpritePath(level, 1);
+                            tile2_path = getLevelSpritePath(level, 2);
+                            tile3_path = getLevelSpritePath(level, 3);
+
+                            tile1.texture->loadFromFile(tile1_path);
+                            tile2.texture->loadFromFile(tile2_path);
+                            tile3.texture->loadFromFile(tile3_path);
+
                             normal_tickrate = calculateSpeed(level);
                             LevelUpSound.sound->play();
                         }
