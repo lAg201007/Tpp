@@ -643,6 +643,9 @@ int main() {
                             top_score = score;
                         }
 
+                        clearLines(completedLines, colums, tileMap, *window, empty_tile);
+                        makeBlocksFall(completedLines, colums, tileMap);
+
                         if (linesThisLevel >= linesForLevelingUp) {
                             linesThisLevel -= linesForLevelingUp;
                             linesForLevelingUp + 10;
@@ -659,9 +662,6 @@ int main() {
                             normal_tickrate = calculateSpeed(level);
                             LevelUpSound.sound->play();
                         }
-
-                        clearLines(completedLines, colums, tileMap, *window, empty_tile);
-                        makeBlocksFall(completedLines, colums, tileMap);
                     }
 
                     PlaceSound.sound->play();
