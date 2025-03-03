@@ -351,7 +351,6 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
         window.display();
     }
 }
-
 void makeBlocksFall(const std::vector<int>& clearedLines, int columns, std::vector<std::vector<Tile>>& tileMap) {
     if (clearedLines.empty()) return;
 
@@ -375,13 +374,21 @@ void makeBlocksFall(const std::vector<int>& clearedLines, int columns, std::vect
 
         if (newY < tileMap.size()) {
             for (int x = 2; x < columns - 1; x++) {
-                tileMap[newY][x].filePath = tileMap[y][x].filePath;
+                std::string originalFilePath = tileMap[y][x].filePath;
 
-                if (tileMap[y][x].filePath != empty_tile_path) {
+                tileMap[newY][x].filePath = originalFilePath;
+
+                if (originalFilePath == empty_tile_path) {
+                    tileMap[newY][x].sprite->setTexture(*empty_tile.texture);
+                }
+                else if (originalFilePath == tile1_path) {
                     tileMap[newY][x].sprite->setTexture(*tile1.texture);
                 }
-                else {
-                    tileMap[newY][x].sprite->setTexture(*empty_tile.texture);
+                else if (originalFilePath == tile2_path) {
+                    tileMap[newY][x].sprite->setTexture(*tile2.texture);
+                }
+                else if (originalFilePath == tile3_path) {
+                    tileMap[newY][x].sprite->setTexture(*tile3.texture);
                 }
 
                 tileMap[y][x].filePath = empty_tile_path;
