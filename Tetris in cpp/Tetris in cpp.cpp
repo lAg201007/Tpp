@@ -348,6 +348,27 @@ void SaveTopScore(int score) {
     Data.close();
 }
 
+int calculateSpeed(int level) {
+    if (level <= 9) {
+        return 48 - (level * 5);
+    }
+    else if (level >= 10 && level <= 12) {
+        return 5;
+    }
+    else if (level >= 13 && level <= 15) {
+        return 4;
+    }
+    else if (level >= 16 && level <= 18) {
+        return 3;
+    }
+    else if (level >= 19 && level <= 28) {
+        return 2;
+    }
+    else if (level >= 29) {
+        return 1;
+    }
+}
+
 int main() {
     int top_score = 0;
 
@@ -366,7 +387,7 @@ int main() {
 
     int score = 0;
 
-    int normal_tickrate = 48 - (level * 5);
+    int normal_tickrate = calculateSpeed(level);
     int fast_tickrate = 3;
     int tickrate = normal_tickrate;
     int tick = 5;
@@ -544,6 +565,7 @@ int main() {
                             linesThisLevel -= linesForLevelingUp;
                             linesForLevelingUp + 10;
                             level++;
+                            normal_tickrate = calculateSpeed(level);
                             LevelUpSound.sound->play();
                         }
 
