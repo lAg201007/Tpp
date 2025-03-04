@@ -73,7 +73,6 @@ Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object TitleScreen("Sprites/title_screen.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object NextPieceUI("Sprites/Pieces/L.png", 416, 240, 12, 12, 2.0f, 2.0f);
 
-
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
 };
@@ -176,7 +175,6 @@ public:
         if (tileMap[y][x].filePath != empty_tile_path) {
             bool isPartOfPiece = checkIfIsPartOfPiece(x, y);
             if (!isPartOfPiece) {
-                std::cout << tileMap[y][x].filePath << std::endl;
                 return false;
             }
         }
