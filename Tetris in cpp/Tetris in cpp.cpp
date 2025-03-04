@@ -176,6 +176,7 @@ public:
         if (tileMap[y][x].filePath != empty_tile_path) {
             bool isPartOfPiece = checkIfIsPartOfPiece(x, y);
             if (!isPartOfPiece) {
+                std::cout << tileMap[y][x].filePath << std::endl;
                 return false;
             }
         }
@@ -268,7 +269,7 @@ public:
     };
 };
 
-void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileMap) {
+void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileMap, int level) {
     for (auto& row : tileMap) {
         for (auto& tile : row) {
             // Check if the current texture path matches the tile's file path
@@ -287,7 +288,18 @@ void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileM
             else if (tile.filePath == wall_path) {
                 tile.sprite->setTexture(*wall.texture);
             }
-
+            else if (tile.filePath == "Sprites/Tiles/" + std::to_string(level - 1) + "_1.png"){
+                tile.filePath = "Sprites/Tiles/" + std::to_string(level) + "_1.png";
+                renderTiles(window, tileMap, level);
+            }
+            else if (tile.filePath == "Sprites/Tiles/" + std::to_string(level - 1) + "_2.png") {
+                tile.filePath = "Sprites/Tiles/" + std::to_string(level) + "_2.png";
+                renderTiles(window, tileMap, level);
+            }
+            else if (tile.filePath == "Sprites/Tiles/" + std::to_string(level - 1) + "_3.png") {
+                tile.filePath = "Sprites/Tiles/" + std::to_string(level) + "_3.png";
+                renderTiles(window, tileMap, level);
+            }
             // Draw the tile with the correct texture
             window.draw(*tile.sprite);
         }
@@ -314,7 +326,7 @@ std::vector<int> checkCompletedLines(int startY, int endY, int columns, const st
     return completedLines;
 }
 
-void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window, Texture texture, std::string path) {
+void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window, Texture texture, std::string path,int level) {
     if (lines.empty()) return;
 
     if (lines.size() == 4) {
@@ -330,7 +342,7 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
         }
 
         window.clear();
-        renderTiles(window, tileMap);
+        renderTiles(window, tileMap, level);
         window.draw(*Gui.sprite);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         window.display();
@@ -360,9 +372,7 @@ void makeBlocksFall(const std::vector<int>& clearedLines, int columns, std::vect
         if (newY < tileMap.size()) {
             for (int x = 2; x < columns - 1; x++) {
                 std::string originalFilePath = tileMap[y][x].filePath;
-
                 tileMap[newY][x].filePath = originalFilePath;
-
                 tileMap[y][x].filePath = empty_tile_path;
             }
         }
@@ -569,7 +579,7 @@ int main() {
                         for (int y = rows - 1; y >= 0; y--) {
                             allYs.push_back(y);
                         }
-                        clearLines(allYs, colums, tileMap, *window, tile2, tile2_path);
+                        clearLines(allYs, colums, tileMap, *window, tile2, tile2_path, level);
                         InGame = false;
                         std::this_thread::sleep_for(std::chrono::seconds(2));
                         SaveTopScore(top_score);
@@ -610,7 +620,7 @@ int main() {
                             top_score = score;
                         }
 
-                        clearLines(completedLines, colums, tileMap, *window, empty_tile, empty_tile_path);
+                        clearLines(completedLines, colums, tileMap, *window, empty_tile, empty_tile_path, level);
                         makeBlocksFall(completedLines, colums, tileMap);
 
                         if (linesThisLevel >= linesForLevelingUp) {
@@ -640,7 +650,7 @@ int main() {
 
             window->clear();
 
-            renderTiles(*window, tileMap);
+            renderTiles(*window, tileMap, level);
 
             window->draw(*Gui.sprite);
 
