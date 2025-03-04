@@ -586,6 +586,10 @@ int main() {
                         std::string tile2_path = "Sprites/Tiles/1_2.png";
                         std::string tile3_path = "Sprites/Tiles/1_3.png";
 
+                        tile1.texture->loadFromFile(tile1_path);
+                        tile2.texture->loadFromFile(tile2_path);
+                        tile3.texture->loadFromFile(tile3_path);
+
                         goto start;
                     }
 
@@ -629,6 +633,10 @@ int main() {
                             tile1_path = getLevelSpritePath(level, 1);
                             tile2_path = getLevelSpritePath(level, 2);
                             tile3_path = getLevelSpritePath(level, 3);
+
+                            tile1.texture->loadFromFile(tile1_path);
+                            tile2.texture->loadFromFile(tile2_path);
+                            tile3.texture->loadFromFile(tile3_path);
 
                             normal_tickrate = calculateSpeed(level);
                             LevelUpSound.sound->play();
