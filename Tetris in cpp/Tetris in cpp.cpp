@@ -300,13 +300,30 @@ public:
 };
 
 void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileMap) {
-    for (const auto& row : tileMap) {
+    for (auto& row : tileMap) {
         for (auto& tile : row) {
+            // Check if the current texture path matches the tile's file path
+            if (tile.filePath == empty_tile_path) {
+                tile.sprite->setTexture(*empty_tile.texture);
+            }
+            else if (tile.filePath == tile1_path) {
+                tile.sprite->setTexture(*tile1.texture);
+            }
+            else if (tile.filePath == tile2_path) {
+                tile.sprite->setTexture(*tile2.texture);
+            }
+            else if (tile.filePath == tile3_path) {
+                tile.sprite->setTexture(*tile3.texture);
+            }
+            else if (tile.filePath == "Sprites/Tiles/wall.png") {
+                tile.sprite->setTexture(*wall.texture);
+            }
+
+            // Draw the tile with the correct texture
             window.draw(*tile.sprite);
         }
     }
 }
-
 std::vector<int> checkCompletedLines(int startY, int endY, int columns, const std::vector<std::vector<Tile>>& tileMap) {
     std::vector<int> completedLines;
 
@@ -328,7 +345,7 @@ std::vector<int> checkCompletedLines(int startY, int endY, int columns, const st
     return completedLines;
 }
 
-void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window, Texture texture) {
+void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vector<Tile>>& tileMap, sf::RenderWindow& window, Texture texture, std::string path) {
     if (lines.empty()) return;
 
     if (lines.size() == 4) {
@@ -340,7 +357,7 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
 
     for (int x = 2; x < columns - 1; x++) {
         for (int lineIndex : lines) {
-            tileMap[lineIndex][x].filePath = empty_tile_path;
+            tileMap[lineIndex][x].filePath = path;
             tileMap[lineIndex][x].sprite->setTexture(*texture.texture);
         }
 
@@ -598,7 +615,7 @@ int main() {
                         for (int y = rows - 1; y >= 0; y--) {
                             allYs.push_back(y);
                         }
-                        clearLines(allYs, colums, tileMap, *window, tile1);
+                        clearLines(allYs, colums, tileMap, *window, tile2, tile2_path);
                         InGame = false;
                         std::this_thread::sleep_for(std::chrono::seconds(2));
                         SaveTopScore(top_score);
@@ -643,7 +660,7 @@ int main() {
                             top_score = score;
                         }
 
-                        clearLines(completedLines, colums, tileMap, *window, empty_tile);
+                        clearLines(completedLines, colums, tileMap, *window, empty_tile, empty_tile_path);
                         makeBlocksFall(completedLines, colums, tileMap);
 
                         if (linesThisLevel >= linesForLevelingUp) {
