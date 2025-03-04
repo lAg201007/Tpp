@@ -45,6 +45,7 @@ std::string empty_tile_path = "Sprites/Tiles/empty_tile.png";
 std::string tile1_path = "Sprites/Tiles/1_1.png";
 std::string tile2_path = "Sprites/Tiles/1_2.png";
 std::string tile3_path = "Sprites/Tiles/1_3.png";
+std::string wall_path = "Sprites/Tiles/wall.png";
 
 Texture empty_tile(empty_tile_path);
 Texture tile1(tile1_path);
@@ -114,15 +115,15 @@ public:
         : tileMap(map), posX(Xpos), posY(Ypos), pieceShape(shape) {
         if (shape == IShape || shape == OShape || shape == TShape) {
             currentTexturePath = tile1_path;
-            placeOnTileMap(currentTexturePath, tile1);
+            placeOnTileMap(currentTexturePath);
         }
         else if (shape == ZShape || shape == JShape) {
             currentTexturePath = tile3_path;
-            placeOnTileMap(currentTexturePath, tile3);
+            placeOnTileMap(currentTexturePath);
         }
         else if (shape == LShape || shape == SShape) {
             currentTexturePath = tile2_path;
-            placeOnTileMap(currentTexturePath, tile2);
+            placeOnTileMap(currentTexturePath);
         }
     }
 
@@ -133,19 +134,17 @@ public:
             int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
-                tileMap[y][x].sprite->setTexture(*empty_tile.texture); 
                 tileMap[y][x].filePath = empty_tile_path;
             }
         }
     }
 
-    void placeOnTileMap(std::string path, Texture texture) {
+    void placeOnTileMap(std::string path) {
         for (const auto& [pieceX, pieceY] : pieceShape) {
             int x = posX + pieceX;
             int y = posY + pieceY;
 
             if (y >= 0 && y < tileMap.size() && x >= 0 && x < tileMap[0].size()) {
-                tileMap[y][x].sprite->setTexture(*texture.texture);
                 tileMap[y][x].filePath = path;
             }
         }
@@ -156,22 +155,7 @@ public:
         posX += pieceX;
         posY += pieceY;
 
-        Texture* textureToUse = nullptr;
-
-        if (currentTexturePath == tile1_path) {
-            textureToUse = &tile1;
-        }
-        else if (currentTexturePath == tile2_path) {
-            textureToUse = &tile2;
-        }
-        else if (currentTexturePath == tile3_path) {
-            textureToUse = &tile3;
-        }
-        else {
-            textureToUse = &empty_tile;
-        }
-
-        placeOnTileMap(currentTexturePath, *textureToUse);
+        placeOnTileMap(currentTexturePath);
     }
 
     bool checkIfIsPartOfPiece(int newX,int newY) {
@@ -256,22 +240,7 @@ public:
             RotateSound.sound->play();
         }
 
-        Texture* textureToUse = nullptr;
-
-        if (currentTexturePath == tile1_path) {
-            textureToUse = &tile1;
-        }
-        else if (currentTexturePath == tile2_path) {
-            textureToUse = &tile2;
-        }
-        else if (currentTexturePath == tile3_path) {
-            textureToUse = &tile3;
-        }
-        else {
-            textureToUse = &empty_tile;
-        }
-
-        placeOnTileMap(currentTexturePath, *textureToUse);
+        placeOnTileMap(currentTexturePath);
     }
 
     bool isRotationValid(std::vector<std::pair<int,int>> rotatedShape) {
@@ -315,7 +284,7 @@ void renderTiles(sf::RenderWindow& window, std::vector<std::vector<Tile>>& tileM
             else if (tile.filePath == tile3_path) {
                 tile.sprite->setTexture(*tile3.texture);
             }
-            else if (tile.filePath == "Sprites/Tiles/wall.png") {
+            else if (tile.filePath == wall_path) {
                 tile.sprite->setTexture(*wall.texture);
             }
 
@@ -358,7 +327,6 @@ void clearLines(const std::vector<int>& lines, int columns, std::vector<std::vec
     for (int x = 2; x < columns - 1; x++) {
         for (int lineIndex : lines) {
             tileMap[lineIndex][x].filePath = path;
-            tileMap[lineIndex][x].sprite->setTexture(*texture.texture);
         }
 
         window.clear();
@@ -395,21 +363,7 @@ void makeBlocksFall(const std::vector<int>& clearedLines, int columns, std::vect
 
                 tileMap[newY][x].filePath = originalFilePath;
 
-                if (originalFilePath == empty_tile_path) {
-                    tileMap[newY][x].sprite->setTexture(*empty_tile.texture);
-                }
-                else if (originalFilePath == tile1_path) {
-                    tileMap[newY][x].sprite->setTexture(*tile1.texture);
-                }
-                else if (originalFilePath == tile2_path) {
-                    tileMap[newY][x].sprite->setTexture(*tile2.texture);
-                }
-                else if (originalFilePath == tile3_path) {
-                    tileMap[newY][x].sprite->setTexture(*tile3.texture);
-                }
-
                 tileMap[y][x].filePath = empty_tile_path;
-                tileMap[y][x].sprite->setTexture(*empty_tile.texture);
             }
         }
     }
@@ -507,8 +461,8 @@ int main() {
     // Loop pelos tiles antes de abrir a janela
     for (const auto& row : tileMap) {
         for (auto& tile : row) {
-            if (tile.xGridPos == 1 || tile.xGridPos == colums - 1 || tile.yGridPos == 0 || tile.yGridPos == rows) {
-                tile.sprite->setTexture(*wall.texture);
+            if (tile.xGridPos == 1 || tile.xGridPos == colums - 1 ||  tile.yGridPos == rows) {
+                tileMap[tile.yGridPos][tile.xGridPos].filePath = wall_path;
             }
         }
     }
@@ -624,10 +578,6 @@ int main() {
                         std::string tile2_path = "Sprites/Tiles/1_2.png";
                         std::string tile3_path = "Sprites/Tiles/1_3.png";
 
-                        tile1.texture->loadFromFile(tile1_path);
-                        tile2.texture->loadFromFile(tile2_path);
-                        tile3.texture->loadFromFile(tile3_path);
-
                         goto start;
                     }
 
@@ -671,10 +621,6 @@ int main() {
                             tile1_path = getLevelSpritePath(level, 1);
                             tile2_path = getLevelSpritePath(level, 2);
                             tile3_path = getLevelSpritePath(level, 3);
-
-                            tile1.texture->loadFromFile(tile1_path);
-                            tile2.texture->loadFromFile(tile2_path);
-                            tile3.texture->loadFromFile(tile3_path);
 
                             normal_tickrate = calculateSpeed(level);
                             LevelUpSound.sound->play();
