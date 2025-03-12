@@ -486,6 +486,7 @@ int main() {
     bool InTitleScreen = true;
     bool InGame = false;
     bool InGameOverScreen = false;
+    bool GamePaused = false;
 
     std::pair<std::vector<std::pair<int,int>>,std::vector<std::pair<int,int>>> PiecesRandom = {PiecesArray[rng(0,6)],PiecesArray[rng(0,6)]};
     
@@ -521,20 +522,23 @@ int main() {
             // Os tiles das bordas sempre devem ficar vazios
             // Tiles usáveis: x de 1 a 10 e y de 1 a 20
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-                tickrate = fast_tickrate;
-            }
-            else {
-                tickrate = normal_tickrate;
-            }
+            if (!GamePaused) {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                    tickrate = fast_tickrate;
+                }
+                else {
+                    tickrate = normal_tickrate;
+                }
 
-            if (previous_tickrate != tickrate) {
-                tick = 1;
-                previous_tickrate = tickrate;
+                if (previous_tickrate != tickrate) {
+                    tick = 1;
+                    previous_tickrate = tickrate;
+                }
+
+                tick -= 1;
+
             }
-
-            tick -= 1;
-
+            
             while (const std::optional event = window->pollEvent()) {
 
                 if (event->is<sf::Event::Closed>()) {
@@ -545,27 +549,33 @@ int main() {
 
                 else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                     if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
-                        window->close();
-                        SaveTopScore(top_score);
-                        return 0;
-                    }
-                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
-                        if (MainPiece->canMoveSideways(-1)) {
-                            MoveSound.sound->play();
-                            MainPiece->move(-1, 0);
+                        if (GamePaused) {
+                            GamePaused = false;
                         }
-                    
-                    }
-                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
-                        if (MainPiece->canMoveSideways(1)) {
-                            MoveSound.sound->play();
-                            MainPiece->move(1, 0);
+                        else {
+                            GamePaused = true;
                         }
+                    }
+                    if (!GamePaused) {
+                        if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
+                            if (MainPiece->canMoveSideways(-1)) {
+                                MoveSound.sound->play();
+                                MainPiece->move(-1, 0);
+                            }
 
+                        }
+                        else if (keyPressed->scancode == sf::Keyboard::Scancode::Right) {
+                            if (MainPiece->canMoveSideways(1)) {
+                                MoveSound.sound->play();
+                                MainPiece->move(1, 0);
+                            }
+
+                        }
+                        else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
+                            MainPiece->rotate();
+                        }
                     }
-                    else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
-                        MainPiece->rotate();
-                    }
+                    
                 }
             }
 
@@ -646,11 +656,12 @@ int main() {
                     PlaceSound.sound->play();
 
                     MainPiece.reset(new Piece(tileMap, 5, 1, PiecesRandom.first));
-
                 }
                 else {
                     MainPiece->move(0, 1);
                 }
+
+
                 tick = tickrate;
             }
 
