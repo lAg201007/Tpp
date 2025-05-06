@@ -455,6 +455,8 @@ int main() {
 
     int lineCounter = 0;
 
+    std::vector<std::pair<int, int>> StoredPiece;
+
     std::vector<std::vector<Tile>> tileMap;
 
     for (int y = 0; y < rows; y++) {
@@ -576,8 +578,31 @@ int main() {
                         else if (keyPressed->scancode == sf::Keyboard::Scancode::Up) {
                             MainPiece->rotate();
                         }
-                    }
-                    
+                        else if (keyPressed->scancode == sf::Keyboard::Scancode::C) {
+                            if (StoredPiece.empty()) {
+                                StoredPiece = MainPiece->pieceShape;
+                                MainPiece->clearOnTileMap();
+                                MainPiece.reset(new Piece(tileMap, 5, 1, PiecesRandom.first));
+
+                                PiecesRandom.first = PiecesRandom.second;
+                                PiecesRandom.second = PiecesArray[rng(0, 6)];
+
+								std::cout << "Stored piece: " << MainPiece->currentTexturePath << std::endl;
+							}
+                            else {
+                                std::cout << "New first: " << MainPiece->currentTexturePath << std::endl;
+                                
+                                PiecesRandom.second = PiecesRandom.first;
+                                PiecesRandom.first = MainPiece->pieceShape;
+
+								MainPiece->clearOnTileMap();
+                                MainPiece.reset(new Piece(tileMap, 5, 1, StoredPiece));
+                                StoredPiece.clear();
+
+                                std::cout << "Loaded piece: " << MainPiece->currentTexturePath << std::endl;
+                            }
+                        }
+                    }   
                 }
             }
 
