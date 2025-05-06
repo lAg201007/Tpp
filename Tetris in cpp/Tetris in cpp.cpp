@@ -550,9 +550,11 @@ int main() {
                 else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                     if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
                         if (GamePaused) {
+                            TetrisClearSound.sound->play();
                             GamePaused = false;
                         }
                         else {
+                            TetrisClearSound.sound->play();
                             GamePaused = true;
                         }
                     }
