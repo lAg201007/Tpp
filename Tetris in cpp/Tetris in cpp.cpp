@@ -72,6 +72,7 @@ Sound LevelUpSound("SoundEffects/level_up.wav", 200);
 Object Gui("Sprites/UI.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object TitleScreen("Sprites/title_screen.png", 0, 0, 0, 0, 2.0f, 2.0f);
 Object NextPieceUI("Sprites/Pieces/L.png", 416, 240, 12, 12, 2.0f, 2.0f);
+Object StoredPieceUI("Sprites/Pieces/L.png", 100, 200, 12, 12, 3.0f, 3.0f);
 
 std::vector<std::pair<int, int>> LShape = {
     {0, 0}, {0, 1}, {0, 2}, {1, 2}
@@ -477,7 +478,7 @@ int main() {
         }
     }
 
-    std::unique_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 5, 1, TShape);
+    std::shared_ptr<Piece> MainPiece = std::make_unique<Piece>(tileMap, 5, 1, TShape);
    
     std::unique_ptr window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ width, height }), "Tetris");
 
@@ -582,27 +583,19 @@ int main() {
                             if (StoredPiece.empty()) {
                                 StoredPiece = MainPiece->pieceShape;
                                 MainPiece->clearOnTileMap();
-                                MainPiece.reset(new Piece(tileMap, 5, 1, PiecesRandom.first));
-
                                 PiecesRandom.first = PiecesRandom.second;
                                 PiecesRandom.second = PiecesArray[rng(0, 6)];
-
-								std::cout << "Stored piece: " << MainPiece->currentTexturePath << std::endl;
+                                MainPiece.reset(new Piece(tileMap, 5, 1, PiecesRandom.first));
 							}
                             else {
-                                std::cout << "New first: " << MainPiece->currentTexturePath << std::endl;
-                                
                                 PiecesRandom.second = PiecesRandom.first;
                                 PiecesRandom.first = MainPiece->pieceShape;
-
-								MainPiece->clearOnTileMap();
+                                MainPiece->clearOnTileMap();
                                 MainPiece.reset(new Piece(tileMap, 5, 1, StoredPiece));
                                 StoredPiece.clear();
-
-                                std::cout << "Loaded piece: " << MainPiece->currentTexturePath << std::endl;
                             }
                         }
-                    }   
+                    }
                 }
             }
 
@@ -709,16 +702,32 @@ int main() {
             Texture* pieceTextures[] = { &L, &J, &O, &I, &T, &S, &Z};
 
             int textureIndex = 0;
+            int StoredTextureIndex = 0;
+
             for (int i = 0; i < 7; i++) {
                 if (PiecesRandom.second == PiecesArray[i]) {
                     textureIndex = i;
                     break;
                 }
             }
-            
+
             NextPieceUI.sprite->setTexture(*pieceTextures[textureIndex]->texture);
 
+			if (!StoredPiece.empty()) {
+                for (int i = 0; i < 7; i++) {
+                    if (StoredPiece == PiecesArray[i]) {
+                        StoredTextureIndex = i;
+                        break;
+                    }
+                }
+                StoredPieceUI.sprite->setTexture(*pieceTextures[StoredTextureIndex]->texture);
+			}
+            else {
+				StoredPieceUI.sprite->setTexture(*empty_tile.texture);
+            }
+
             window->draw(*NextPieceUI.sprite);
+			window->draw(*StoredPieceUI.sprite);
 
             window->display();
         }
